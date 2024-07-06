@@ -3,12 +3,12 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 
+	"ypeskov/go-orgfin/internal/config"
 	"ypeskov/go-orgfin/internal/database"
 )
 
@@ -18,12 +18,12 @@ type Server struct {
 	db database.Service
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+func New(cfg *config.Config) *http.Server {
+	port, _ := strconv.Atoi(cfg.Port)
 	NewServer := &Server{
 		port: port,
 
-		db: database.New(),
+		db: database.New(cfg),
 	}
 
 	// Declare Server config
