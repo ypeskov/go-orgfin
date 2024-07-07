@@ -35,7 +35,7 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 	fileServer := http.FileServer(http.FS(web.Files))
 	e.GET("/assets/*", echo.WrapHandler(fileServer))
 
-	e.GET("/", echo.WrapHandler(templ.Handler(components.HelloForm())))
+	e.GET("/", HomeWebHandler)
 
 	commonGroup := e.Group("/common")
 	routesInstance.RegisterCommonRoutes(commonGroup)
@@ -46,20 +46,28 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 	return routesInstance
 }
 
-func HelloWebHandler(w http.ResponseWriter, r *http.Request) {
+func HomeWebHandler(c echo.Context) error {
 	log := routesInstance.logger
-	log.Info("HelloWebHandler")
-	err := r.ParseForm()
+	log.Info("HomeWebHandler")
+
+	passwords, err := routesInstance.ServicesManager.PasswordService.GetAllPasswords()
 	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		log.Errorf("Error getting all passwords: %e\n", err)
+		return err
 	}
 
-	name := r.FormValue("name")
-	log.Infof("Name: %s", name)
-	component := components.HelloPost(name)
-	err = component.Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		routesInstance.logger.Fatalf("Error rendering in HelloWebHandler: %e", err)
+	component := components.ListOfPasswords(passwords)
+
+	return Render(c, http.StatusOK, component)
+}
+
+func Render(ctx echo.Context, statusCode int, t templ.Component) error {
+	buf := templ.GetBuffer()
+	defer templ.ReleaseBuffer(buf)
+
+	if err := t.Render(ctx.Request().Context(), buf); err != nil {
+		return err
 	}
+
+	return ctx.HTML(statusCode, buf.String())
 }
