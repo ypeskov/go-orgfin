@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"ypeskov/go-orgfin/cmd/web"
+	"ypeskov/go-orgfin/cmd/web/components"
 	"ypeskov/go-orgfin/internal/logger"
 	"ypeskov/go-orgfin/services"
 )
@@ -33,6 +35,8 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 	fileServer := http.FileServer(http.FS(web.Files))
 	e.GET("/assets/*", echo.WrapHandler(fileServer))
 
+	e.GET("/", echo.WrapHandler(templ.Handler(components.HelloForm())))
+
 	commonGroup := e.Group("/common")
 	routesInstance.RegisterCommonRoutes(commonGroup)
 
@@ -40,4 +44,22 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 	routesInstance.RegisterPasswordsRoutes(passwordsGroup)
 
 	return routesInstance
+}
+
+func HelloWebHandler(w http.ResponseWriter, r *http.Request) {
+	log := routesInstance.logger
+	log.Info("HelloWebHandler")
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+	}
+
+	name := r.FormValue("name")
+	log.Infof("Name: %s", name)
+	component := components.HelloPost(name)
+	err = component.Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		routesInstance.logger.Fatalf("Error rendering in HelloWebHandler: %e", err)
+	}
 }
