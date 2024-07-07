@@ -7,6 +7,7 @@ import (
 
 type PasswordsService interface {
 	GetAllPasswords() ([]*models.Password, error)
+	GetPasswordById(id string) (*models.Password, error)
 }
 
 type Passwords struct {
@@ -27,4 +28,15 @@ func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
 	}
 
 	return passwords, nil
+}
+
+func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
+	managerInstance.logger.Info("Getting password by id service")
+	password, err := p.PasswordRepo.GetPasswordById(id)
+	if err != nil {
+		managerInstance.logger.Errorf("Error getting password by id: %e\n", err)
+		return nil, err
+	}
+
+	return password, nil
 }

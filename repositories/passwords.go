@@ -9,6 +9,7 @@ import (
 
 type PasswordsRepository interface {
 	GetAllPasswords() ([]*models.Password, error)
+	GetPasswordById(id string) (*models.Password, error)
 }
 
 type Passwords struct {
@@ -33,4 +34,16 @@ func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
 	}
 
 	return passwords, nil
+}
+
+func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
+	p.logger.Info("Getting password by id repository")
+	var password models.Password
+	err := p.db.Db.Get(&password, "SELECT * FROM passwords WHERE id = $1", id)
+	if err != nil {
+		p.logger.Errorln(fmt.Sprintf("Error getting password by id: %v", err))
+		return nil, err
+	}
+
+	return &password, nil
 }
