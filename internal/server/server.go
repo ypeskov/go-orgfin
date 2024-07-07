@@ -7,6 +7,7 @@ import (
 	"time"
 	"ypeskov/go-orgfin/internal/logger"
 	"ypeskov/go-orgfin/internal/routes"
+	"ypeskov/go-orgfin/services"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -28,8 +29,9 @@ func New(cfg *config.Config, logger *logger.Logger) *http.Server {
 		Db:   database.New(cfg),
 	}
 
-	routesInstance := routes.RegisterRoutes(logger)
-
+	servicesManager := services.NewServiceManager(&NewServer.Db)
+	routesInstance := routes.RegisterRoutes(logger, servicesManager)
+	
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),

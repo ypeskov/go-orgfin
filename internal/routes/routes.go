@@ -6,22 +6,25 @@ import (
 	"net/http"
 	"ypeskov/go-orgfin/cmd/web"
 	"ypeskov/go-orgfin/internal/logger"
+	"ypeskov/go-orgfin/services"
 )
 
 type Routes struct {
-	logger *logger.Logger
-	Echo   *echo.Echo
+	logger          *logger.Logger
+	Echo            *echo.Echo
+	ServicesManager *services.ServiceManager
 }
 
 var routesInstance *Routes
 
-func RegisterRoutes(logger *logger.Logger) *Routes {
+func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceManager) *Routes {
 	logger.Info("Registering routes")
 	e := echo.New()
 
 	routesInstance = &Routes{
-		logger: logger,
-		Echo:   e,
+		logger:          logger,
+		Echo:            e,
+		ServicesManager: servicesManager,
 	}
 
 	//e.Use(middleware.Logger())
@@ -32,6 +35,9 @@ func RegisterRoutes(logger *logger.Logger) *Routes {
 
 	commonGroup := e.Group("/common")
 	routesInstance.RegisterCommonRoutes(commonGroup)
+
+	passwordsGroup := e.Group("/passwords")
+	routesInstance.RegisterPasswordsRoutes(passwordsGroup)
 
 	return routesInstance
 }
