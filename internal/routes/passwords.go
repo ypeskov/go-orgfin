@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -12,8 +11,8 @@ func (r *Routes) RegisterPasswordsRoutes(g *echo.Group) {
 }
 
 func GetAllPasswordsHandler(c echo.Context) error {
+	routesInstance.logger.Info("Getting all passwords handler")
 	passwords, _ := routesInstance.ServicesManager.PasswordService.GetAllPasswords()
-	fmt.Println(passwords)
 
 	return c.JSON(http.StatusOK, passwords)
 }

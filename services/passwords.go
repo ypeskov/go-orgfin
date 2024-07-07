@@ -1,9 +1,12 @@
 package services
 
-import "ypeskov/go-orgfin/repositories"
+import (
+	"ypeskov/go-orgfin/models"
+	"ypeskov/go-orgfin/repositories"
+)
 
 type PasswordsService interface {
-	GetAllPasswords() ([]string, error)
+	GetAllPasswords() ([]*models.Password, error)
 }
 
 type Passwords struct {
@@ -16,7 +19,8 @@ func NewPasswordService(passwordRepo *repositories.PasswordsRepository) Password
 	}
 }
 
-func (p *Passwords) GetAllPasswords() ([]string, error) {
+func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
+	managerInstance.logger.Info("Getting all passwords service")
 	passwords, err := p.PasswordRepo.GetAllPasswords()
 	if err != nil {
 		return nil, err
