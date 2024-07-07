@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
 	"time"
@@ -31,8 +30,6 @@ func New(cfg *config.Config, logger *logger.Logger) *http.Server {
 
 	routesInstance := routes.RegisterRoutes(logger)
 
-	routesInstance.Echo.GET("/health", healthHandler)
-
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
@@ -43,8 +40,4 @@ func New(cfg *config.Config, logger *logger.Logger) *http.Server {
 	}
 
 	return server
-}
-
-func healthHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, NewServer.Db.Health())
 }

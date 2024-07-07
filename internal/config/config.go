@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Port                        string `env:"PORT" envDefault:":3000"`
 	LogLevel                    string `env:"LOG_LEVEL" envDefault:"INFO"`
-	DbUrl                       string `env:"DATABASE_URL" envDefault:"sqlite3://:memory:"`
+	DbUrl                       string `env:"DATABASE_URL" envDefault:"sqlite3://db.sqlite3"`
 	SecretKey                   string `env:"SECRET_KEY" envDefault:"secret"`
 	AccessTokenLifetimeMinutes  int    `env:"ACCESS_TOKEN_LIFETIME_MINUTES" envDefault:"5"`
 	RefreshTokenLifetimeMinutes int    `env:"REFRESH_TOKEN_LIFETIME_MINUTES" envDefault:"1440"`
