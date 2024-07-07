@@ -10,7 +10,7 @@ import (
 	"ypeskov/go-orgfin/internal/config"
 
 	_ "github.com/joho/godotenv/autoload"
-	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Service represents a service that interacts with a database.
@@ -25,12 +25,8 @@ type Service interface {
 }
 
 type service struct {
-	db       *sqlx.DB
-	dbName   string
-	dbPort   string
-	dbHost   string
-	dbSchema string
-	dbUser   string
+	db    *sqlx.DB
+	dbUrl string
 }
 
 var (
@@ -42,26 +38,17 @@ func New(cfg *config.Config) Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
-	dbConnStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s search_path=%s  sslmode=disable",
-		cfg.DbUser,
-		cfg.DbPass,
-		cfg.DbHost,
-		cfg.DbPort,
-		cfg.DbName,
-		cfg.DbSchema)
-	db, err := sqlx.Connect("postgres", dbConnStr)
+
+	//db, err := sqlx.Connect("postgres", dbConnStr)
+	db, err := sqlx.Open("sqlite3", cfg.DbUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 	dbInstance = &service{
-		db:       db,
-		dbName:   cfg.DbName,
-		dbPort:   cfg.DbPort,
-		dbHost:   cfg.DbHost,
-		dbSchema: cfg.DbSchema,
-		dbUser:   cfg.DbUser,
+		db:    db,
+		dbUrl: cfg.DbUrl,
 	}
-	fmt.Printf("Connected to database: %#v\n", dbInstance)
+	log.Info(fmt.Sprintf("Connected to database: %#v\n", dbInstance))
 
 	return dbInstance
 }
@@ -122,6 +109,6 @@ func (s *service) Health() map[string]string {
 // If the connection is successfully closed, it returns nil.
 // If an error occurs while closing the connection, it returns the error.
 func (s *service) Close() error {
-	log.Printf("Disconnected from database: %s", s.dbName)
+	log.Printf("Disconnected from database: %s", s.dbUrl)
 	return s.db.Close()
 }
