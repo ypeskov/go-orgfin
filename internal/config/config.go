@@ -1,13 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"github.com/caarlos0/env/v10"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
-	Port                        string `env:"PORT" envDefault:":3000"`
+	Port                        string `env:"PORT" envDefault:"3000"`
 	LogLevel                    string `env:"LOG_LEVEL" envDefault:"INFO"`
 	DbUrl                       string `env:"DATABASE_URL" envDefault:"db.sqlite3"`
 	SecretKey                   string `env:"SECRET_KEY" envDefault:"secret"`
@@ -24,6 +25,7 @@ func New() (*Config, error) {
 
 		return nil, err
 	}
+	fmt.Printf("Config: %+v\n", cfg)
 
 	return cfg, nil
 }
