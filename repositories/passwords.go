@@ -11,6 +11,7 @@ type PasswordsRepository interface {
 	GetAllPasswords() ([]*models.Password, error)
 	GetPasswordById(id string) (*models.Password, error)
 	AddPassword(password *models.Password) error
+	UpdatePassword(password *models.Password) error
 }
 
 type Passwords struct {
@@ -51,11 +52,24 @@ func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
 
 func (p *Passwords) AddPassword(password *models.Password) error {
 	p.logger.Info("Adding password repository")
-	fmt.Printf("******Password: %v\n", password)
+
 	_, err := p.db.Db.NamedExec("INSERT INTO passwords (name, url, password) VALUES (:name, :url, :password)",
 		password)
 	if err != nil {
 		p.logger.Errorln(fmt.Sprintf("Error adding password: %v", err))
+		return err
+	}
+
+	return nil
+}
+
+func (p *Passwords) UpdatePassword(password *models.Password) error {
+	p.logger.Info("Updating password repository")
+
+	_, err := p.db.Db.NamedExec("UPDATE passwords SET name = :name, url = :url, password = :password WHERE id = :id",
+		password)
+	if err != nil {
+		p.logger.Errorln(fmt.Sprintf("Error updating password: %v", err))
 		return err
 	}
 

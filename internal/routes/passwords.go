@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"ypeskov/go-orgfin/cmd/web/components"
@@ -9,15 +8,15 @@ import (
 )
 
 func (r *Routes) RegisterPasswordsRoutes(g *echo.Group) {
-	routesInstance.logger.Info("Registering passwords routes")
+	log.Info("Registering passwords routes")
 	g.GET("/new", NewPasswordWebHandler)
 	g.GET("/:id", PasswordDetailsWebHandler)
 	g.POST("", AddPassword)
+	g.POST("/:id", UpdatePassword)
 	g.GET("/:id/edit", EditPasswordWebHandler)
 }
 
 func PasswordDetailsWebHandler(c echo.Context) error {
-	log := routesInstance.logger
 	log.Info("PasswordDetailsWebHandler")
 
 	passwordId := c.Param("id")
@@ -33,7 +32,6 @@ func PasswordDetailsWebHandler(c echo.Context) error {
 }
 
 func NewPasswordWebHandler(c echo.Context) error {
-	log := routesInstance.logger
 	log.Info("NewPasswordWebHandler")
 
 	newPassword := models.Password{}
@@ -44,7 +42,6 @@ func NewPasswordWebHandler(c echo.Context) error {
 }
 
 func AddPassword(c echo.Context) error {
-	log := routesInstance.logger
 	log.Info("AddPassword")
 
 	password := models.Password{}
@@ -52,7 +49,6 @@ func AddPassword(c echo.Context) error {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
-	fmt.Printf("+++++++Password: %v\n", password)
 
 	err := routesInstance.ServicesManager.PasswordService.AddPassword(&password)
 	if err != nil {
@@ -64,7 +60,6 @@ func AddPassword(c echo.Context) error {
 }
 
 func EditPasswordWebHandler(c echo.Context) error {
-	log := routesInstance.logger
 	log.Info("EditPasswordWebHandler")
 
 	passwordId := c.Param("id")
@@ -77,4 +72,22 @@ func EditPasswordWebHandler(c echo.Context) error {
 	component := components.EditPassword(*password)
 
 	return Render(c, http.StatusOK, component)
+}
+
+func UpdatePassword(c echo.Context) error {
+	log.Info("UpdatePassword")
+
+	password := models.Password{}
+	if err := c.Bind(&password); err != nil {
+		log.Errorf("Error binding password: %e\n", err)
+		return err
+	}
+
+	err := routesInstance.ServicesManager.PasswordService.UpdatePassword(&password)
+	if err != nil {
+		log.Errorf("Error updating password: %e\n", err)
+		return err
+	}
+
+	return c.Redirect(http.StatusFound, "/")
 }

@@ -12,8 +12,11 @@ type ServiceManager struct {
 }
 
 var managerInstance *ServiceManager
+var log *logger.Logger
 
 func NewServiceManager(db *database.Service, logger *logger.Logger) *ServiceManager {
+	log = logger
+
 	passwordRepo := repositories.NewPasswordRepo(db, logger)
 	passwordService := NewPasswordService(&passwordRepo)
 
