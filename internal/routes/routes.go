@@ -18,9 +18,11 @@ type Routes struct {
 }
 
 var routesInstance *Routes
+var log *logger.Logger
 
 func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceManager) *Routes {
-	logger.Info("Registering routes")
+	log = logger
+	log.Info("Registering routes")
 	e := echo.New()
 
 	routesInstance = &Routes{
@@ -47,7 +49,6 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 }
 
 func HomeWebHandler(c echo.Context) error {
-	log := routesInstance.logger
 	log.Info("HomeWebHandler")
 
 	passwords, err := routesInstance.ServicesManager.PasswordService.GetAllPasswords()

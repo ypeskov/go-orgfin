@@ -8,6 +8,8 @@ import (
 type PasswordsService interface {
 	GetAllPasswords() ([]*models.Password, error)
 	GetPasswordById(id string) (*models.Password, error)
+	AddPassword(password *models.Password) error
+	UpdatePassword(password *models.Password) error
 }
 
 type Passwords struct {
@@ -21,7 +23,8 @@ func NewPasswordService(passwordRepo *repositories.PasswordsRepository) Password
 }
 
 func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
-	managerInstance.logger.Info("Getting all passwords service")
+	log.Info("Getting all passwords service")
+
 	passwords, err := p.PasswordRepo.GetAllPasswords()
 	if err != nil {
 		return nil, err
@@ -31,7 +34,8 @@ func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
 }
 
 func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
-	managerInstance.logger.Info("Getting password by id service")
+	log.Info("Getting password by id service")
+
 	password, err := p.PasswordRepo.GetPasswordById(id)
 	if err != nil {
 		managerInstance.logger.Errorf("Error getting password by id: %e\n", err)
@@ -39,4 +43,27 @@ func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
 	}
 
 	return password, nil
+}
+
+func (p *Passwords) AddPassword(password *models.Password) error {
+	log.Info("Adding password service")
+	err := p.PasswordRepo.AddPassword(password)
+	if err != nil {
+		managerInstance.logger.Errorf("Error adding password: %e\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (p *Passwords) UpdatePassword(password *models.Password) error {
+	log.Info("Updating password service")
+
+	err := p.PasswordRepo.UpdatePassword(password)
+	if err != nil {
+		managerInstance.logger.Errorf("Error updating password: %e\n", err)
+		return err
+	}
+
+	return nil
 }
