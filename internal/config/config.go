@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/caarlos0/env/v10"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
@@ -25,7 +24,6 @@ func New() (*Config, error) {
 
 		return nil, err
 	}
-	fmt.Printf("Config: %+v\n", cfg)
 
 	return cfg, nil
 }
