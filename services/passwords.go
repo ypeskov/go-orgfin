@@ -8,6 +8,7 @@ import (
 type PasswordsService interface {
 	GetAllPasswords() ([]*models.Password, error)
 	GetPasswordById(id string) (*models.Password, error)
+	AddPassword(password *models.Password) error
 }
 
 type Passwords struct {
@@ -39,4 +40,15 @@ func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
 	}
 
 	return password, nil
+}
+
+func (p *Passwords) AddPassword(password *models.Password) error {
+	managerInstance.logger.Info("Adding password service")
+	err := p.PasswordRepo.AddPassword(password)
+	if err != nil {
+		managerInstance.logger.Errorf("Error adding password: %e\n", err)
+		return err
+	}
+
+	return nil
 }
