@@ -10,6 +10,7 @@ type PasswordsService interface {
 	GetPasswordById(id string) (*models.Password, error)
 	AddPassword(password *models.Password) error
 	UpdatePassword(password *models.Password) error
+	DeletePassword(id string) error
 }
 
 type Passwords struct {
@@ -56,6 +57,16 @@ func (p *Passwords) UpdatePassword(password *models.Password) error {
 	err := p.PasswordRepo.UpdatePassword(password)
 	if err != nil {
 		log.Errorf("Error updating password: %e\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func (p *Passwords) DeletePassword(id string) error {
+	err := p.PasswordRepo.DeletePassword(id)
+	if err != nil {
+		log.Errorf("Error deleting password: %e\n", err)
 		return err
 	}
 
