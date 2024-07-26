@@ -19,43 +19,54 @@ import (
 var embeddedMigrations embed.FS
 
 func MakeMigration(log *logger.Logger, cfg *config.Config) error {
-	if _, err := os.Stat(cfg.DbUrl); os.IsNotExist(err) {
-		file, err := os.Create(cfg.DbUrl)
-		if err != nil {
-			log.Fatalf("cannot create database file: %s", err)
-			return err
-		}
-		file.Close()
-		log.Println("Database file created")
+	if _, err := os.Stat(cfg.DbUrl); err == nil {
+		log.Println("Database already exists. Migration not needed.")
+		return nil
+	} else if !os.IsNotExist(err) {
+		log.Fatalf("Error checking if database exists: %s", err)
+		return err
 	}
+
+	file, err := os.Create(cfg.DbUrl)
+	if err != nil {
+		log.Fatalf("Cannot create database file: %s", err)
+		return err
+	}
+
+	err = file.Close()
+	if err != nil {
+		log.Fatalf("Cannot close database file: %s", err)
+		return err
+	}
+	log.Println("Database file created")
 
 	db, err := sql.Open("sqlite3", cfg.DbUrl)
 	if err != nil {
-		log.Fatalf("cannot open database: %s", err)
+		log.Fatalf("Cannot open database: %s", err)
 		return err
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
-		log.Fatalf("could not start SQLite driver: %s", err)
+		log.Fatalf("Could not start SQLite driver: %s", err)
 		return err
 	}
 
 	sourceDriver, err := iofs.New(embeddedMigrations, "scripts")
 	if err != nil {
-		log.Fatalf("could not create iofs driver: %s", err)
+		log.Fatalf("Could not create iofs driver: %s", err)
 		return err
 	}
 
 	m, err := migrate.NewWithInstance("iofs", sourceDriver, "sqlite3", driver)
 	if err != nil {
-		log.Fatalf("could not create migrate instance: %s", err)
+		log.Fatalf("Could not create migrate instance: %s", err)
 		return err
 	}
 
 	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatalf("could not apply migrations: %s", err)
+		log.Fatalf("Could not apply migrations: %s", err)
 		return err
 	}
 
