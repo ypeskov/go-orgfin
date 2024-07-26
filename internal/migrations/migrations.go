@@ -19,28 +19,53 @@ import (
 var embeddedMigrations embed.FS
 
 func MakeMigration(log *logger.Logger, cfg *config.Config) error {
-	if _, err := os.Stat(cfg.DbUrl); err == nil {
-		log.Println("Database already exists. Migration not needed.")
-		return nil
-	} else if !os.IsNotExist(err) {
+	exists, err := checkDatabaseExists(cfg.DbUrl)
+	if err != nil {
 		log.Fatalf("Error checking if database exists: %s", err)
 		return err
 	}
+	if exists {
+		log.Println("Database already exists. Migration not needed.")
+		return nil
+	}
 
-	file, err := os.Create(cfg.DbUrl)
+	err = createDatabase(cfg.DbUrl, log)
+	if err != nil {
+		return err
+	}
+
+	err = applyMigrations(cfg.DbUrl, log)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Migrations applied successfully")
+	return nil
+}
+
+func checkDatabaseExists(dbUrl string) (bool, error) {
+	_, err := os.Stat(dbUrl)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func createDatabase(dbUrl string, log *logger.Logger) error {
+	_, err := os.Create(dbUrl)
 	if err != nil {
 		log.Fatalf("Cannot create database file: %s", err)
 		return err
 	}
-
-	err = file.Close()
-	if err != nil {
-		log.Fatalf("Cannot close database file: %s", err)
-		return err
-	}
 	log.Println("Database file created")
+	return nil
+}
 
-	db, err := sql.Open("sqlite3", cfg.DbUrl)
+func applyMigrations(dbUrl string, log *logger.Logger) error {
+	db, err := sql.Open("sqlite3", dbUrl)
 	if err != nil {
 		log.Fatalf("Cannot open database: %s", err)
 		return err
@@ -69,8 +94,6 @@ func MakeMigration(log *logger.Logger, cfg *config.Config) error {
 		log.Fatalf("Could not apply migrations: %s", err)
 		return err
 	}
-
-	log.Println("Migrations applied successfully")
 
 	return nil
 }

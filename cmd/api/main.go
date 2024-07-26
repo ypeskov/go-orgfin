@@ -7,8 +7,6 @@ import (
 	"ypeskov/go-orgfin/internal/config"
 	"ypeskov/go-orgfin/internal/logger"
 	"ypeskov/go-orgfin/internal/migrations"
-
-	//"ypeskov/go-orgfin/internal/migrations"
 	"ypeskov/go-orgfin/internal/server"
 )
 
@@ -37,6 +35,9 @@ func main() {
 
 }
 
+/*
+openBrowser opens the default web browser at the specified URL.
+*/
 func openBrowser(url string) {
 	var cmd string
 	var args []string

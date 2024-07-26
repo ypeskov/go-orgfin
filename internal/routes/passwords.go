@@ -7,7 +7,7 @@ import (
 	"ypeskov/go-orgfin/models"
 )
 
-func (r *Routes) RegisterPasswordsRoutes(g *echo.Group) {
+func RegisterPasswordsRoutes(g *echo.Group) {
 	log.Info("Registering passwords routes")
 	g.GET("/new", NewPasswordWebHandler)
 	g.GET("/:id", PasswordDetailsWebHandler)
@@ -17,10 +17,8 @@ func (r *Routes) RegisterPasswordsRoutes(g *echo.Group) {
 }
 
 func PasswordDetailsWebHandler(c echo.Context) error {
-	log.Info("PasswordDetailsWebHandler")
-
 	passwordId := c.Param("id")
-	password, err := routesInstance.ServicesManager.PasswordService.GetPasswordById(passwordId)
+	password, err := sManager.PasswordService.GetPasswordById(passwordId)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
 		return err
@@ -32,8 +30,6 @@ func PasswordDetailsWebHandler(c echo.Context) error {
 }
 
 func NewPasswordWebHandler(c echo.Context) error {
-	log.Info("NewPasswordWebHandler")
-
 	newPassword := models.Password{}
 
 	component := components.EditPassword(newPassword)
@@ -42,15 +38,13 @@ func NewPasswordWebHandler(c echo.Context) error {
 }
 
 func AddPassword(c echo.Context) error {
-	log.Info("AddPassword")
-
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
 
-	err := routesInstance.ServicesManager.PasswordService.AddPassword(&password)
+	err := sManager.PasswordService.AddPassword(&password)
 	if err != nil {
 		log.Errorf("Error adding password: %e\n", err)
 		return err
@@ -60,10 +54,8 @@ func AddPassword(c echo.Context) error {
 }
 
 func EditPasswordWebHandler(c echo.Context) error {
-	log.Info("EditPasswordWebHandler")
-
 	passwordId := c.Param("id")
-	password, err := routesInstance.ServicesManager.PasswordService.GetPasswordById(passwordId)
+	password, err := sManager.PasswordService.GetPasswordById(passwordId)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
 		return err
@@ -75,15 +67,13 @@ func EditPasswordWebHandler(c echo.Context) error {
 }
 
 func UpdatePassword(c echo.Context) error {
-	log.Info("UpdatePassword")
-
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
 
-	err := routesInstance.ServicesManager.PasswordService.UpdatePassword(&password)
+	err := sManager.PasswordService.UpdatePassword(&password)
 	if err != nil {
 		log.Errorf("Error updating password: %e\n", err)
 		return err

@@ -23,10 +23,9 @@ func NewPasswordService(passwordRepo *repositories.PasswordsRepository) Password
 }
 
 func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
-	log.Info("Getting all passwords service")
-
 	passwords, err := p.PasswordRepo.GetAllPasswords()
 	if err != nil {
+		log.Errorln("Error getting all passwords: %e\n", err)
 		return nil, err
 	}
 
@@ -34,11 +33,9 @@ func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
 }
 
 func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
-	log.Info("Getting password by id service")
-
 	password, err := p.PasswordRepo.GetPasswordById(id)
 	if err != nil {
-		managerInstance.logger.Errorf("Error getting password by id: %e\n", err)
+		log.Errorf("Error getting password by id: %e\n", err)
 		return nil, err
 	}
 
@@ -46,10 +43,9 @@ func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
 }
 
 func (p *Passwords) AddPassword(password *models.Password) error {
-	log.Info("Adding password service")
 	err := p.PasswordRepo.AddPassword(password)
 	if err != nil {
-		managerInstance.logger.Errorf("Error adding password: %e\n", err)
+		log.Errorf("Error adding password: %e\n", err)
 		return err
 	}
 
@@ -57,11 +53,9 @@ func (p *Passwords) AddPassword(password *models.Password) error {
 }
 
 func (p *Passwords) UpdatePassword(password *models.Password) error {
-	log.Info("Updating password service")
-
 	err := p.PasswordRepo.UpdatePassword(password)
 	if err != nil {
-		managerInstance.logger.Errorf("Error updating password: %e\n", err)
+		log.Errorf("Error updating password: %e\n", err)
 		return err
 	}
 
