@@ -17,19 +17,15 @@ type Routes struct {
 	ServicesManager *services.ServiceManager
 }
 
-var routesInstance *Routes
 var log *logger.Logger
+var sManager *services.ServiceManager
 
-func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceManager) *Routes {
+func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceManager) *echo.Echo {
 	log = logger
 	log.Info("Registering routes")
 	e := echo.New()
 
-	routesInstance = &Routes{
-		logger:          logger,
-		Echo:            e,
-		ServicesManager: servicesManager,
-	}
+	sManager = servicesManager
 
 	//e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -39,19 +35,15 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 
 	e.GET("/", HomeWebHandler)
 
-	commonGroup := e.Group("/common")
-	routesInstance.RegisterCommonRoutes(commonGroup)
+	RegisterPasswordsRoutes(e.Group("/passwords"))
 
-	passwordsGroup := e.Group("/passwords")
-	routesInstance.RegisterPasswordsRoutes(passwordsGroup)
-
-	return routesInstance
+	return e
 }
 
 func HomeWebHandler(c echo.Context) error {
 	log.Info("HomeWebHandler")
 
-	passwords, err := routesInstance.ServicesManager.PasswordService.GetAllPasswords()
+	passwords, err := sManager.PasswordService.GetAllPasswords()
 	if err != nil {
 		log.Errorf("Error getting all passwords: %e\n", err)
 		return err

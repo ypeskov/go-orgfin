@@ -20,19 +20,16 @@ type Server struct {
 	Db   database.Service
 }
 
-var NewServer *Server
-
 func New(cfg *config.Config, logger *logger.Logger) *http.Server {
 	port, _ := strconv.Atoi(cfg.Port)
 	db := *database.New(cfg)
 
 	servicesManager := services.NewServiceManager(&db, logger)
-	routesInstance := routes.RegisterRoutes(logger, servicesManager)
+	echo := routes.RegisterRoutes(logger, servicesManager)
 
-	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
-		Handler:      routesInstance.Echo,
+		Handler:      echo,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
