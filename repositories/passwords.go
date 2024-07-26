@@ -12,6 +12,7 @@ type PasswordsRepository interface {
 	GetPasswordById(id string) (*models.Password, error)
 	AddPassword(password *models.Password) error
 	UpdatePassword(password *models.Password) error
+	DeletePassword(id string) error
 }
 
 type passRepoInstance struct {
@@ -66,6 +67,16 @@ func (p *passRepoInstance) UpdatePassword(password *models.Password) error {
 		password)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error updating password: %v", err))
+		return err
+	}
+
+	return nil
+}
+
+func (p *passRepoInstance) DeletePassword(id string) error {
+	_, err := p.db.Db.Exec("DELETE FROM passwords WHERE id = $1", id)
+	if err != nil {
+		log.Errorln(fmt.Sprintf("Error deleting password: %v", err))
 		return err
 	}
 

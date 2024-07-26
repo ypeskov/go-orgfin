@@ -14,6 +14,7 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 	g.POST("", AddPassword)
 	g.POST("/:id", UpdatePassword)
 	g.GET("/:id/edit", EditPasswordWebHandler)
+	g.DELETE("/:id/delete", DeletePassword)
 }
 
 func PasswordDetailsWebHandler(c echo.Context) error {
@@ -32,7 +33,7 @@ func PasswordDetailsWebHandler(c echo.Context) error {
 func NewPasswordWebHandler(c echo.Context) error {
 	newPassword := models.Password{}
 
-	component := components.EditPassword(newPassword)
+	component := components.PasswordForm(newPassword)
 
 	return Render(c, http.StatusOK, component)
 }
@@ -80,4 +81,17 @@ func UpdatePassword(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusFound, "/")
+}
+
+func DeletePassword(c echo.Context) error {
+	passwordId := c.Param("id")
+	err := sManager.PasswordService.DeletePassword(passwordId)
+	if err != nil {
+		log.Errorf("Error deleting password: %e\n", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error deleting password"})
+	}
+	log.Infof("Password with id %s was deleted", passwordId)
+
+	c.Response().Header().Set("HX-Location", "/")
+	return c.NoContent(http.StatusOK)
 }
