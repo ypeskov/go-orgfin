@@ -2,17 +2,21 @@ package migrations
 
 import (
 	"database/sql"
-	"fmt"
+	"embed"
+	"errors"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"os"
-	"path/filepath"
 	"ypeskov/go-orgfin/internal/config"
 	"ypeskov/go-orgfin/internal/logger"
 
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
+//go:embed scripts/*.sql
+var embeddedMigrations embed.FS
 
 func MakeMigration(log *logger.Logger, cfg *config.Config) error {
 	if _, err := os.Stat(cfg.DbUrl); os.IsNotExist(err) {
@@ -38,22 +42,19 @@ func MakeMigration(log *logger.Logger, cfg *config.Config) error {
 		return err
 	}
 
-	migrationsPath, err := filepath.Abs("migrations")
-	log.Info(fmt.Sprintf("Migrations path: %s", migrationsPath))
+	sourceDriver, err := iofs.New(embeddedMigrations, "scripts")
 	if err != nil {
-		log.Fatalf("could not get absolute path to migrations directory: %s", err)
+		log.Fatalf("could not create iofs driver: %s", err)
 		return err
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://"+migrationsPath,
-		"sqlite3", driver)
+	m, err := migrate.NewWithInstance("iofs", sourceDriver, "sqlite3", driver)
 	if err != nil {
 		log.Fatalf("could not create migrate instance: %s", err)
 		return err
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatalf("could not apply migrations: %s", err)
 		return err
 	}

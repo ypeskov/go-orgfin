@@ -24,17 +24,14 @@ var NewServer *Server
 
 func New(cfg *config.Config, logger *logger.Logger) *http.Server {
 	port, _ := strconv.Atoi(cfg.Port)
-	NewServer = &Server{
-		port: port,
-		Db:   *database.New(cfg),
-	}
+	db := *database.New(cfg)
 
-	servicesManager := services.NewServiceManager(&NewServer.Db, logger)
+	servicesManager := services.NewServiceManager(&db, logger)
 	routesInstance := routes.RegisterRoutes(logger, servicesManager)
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
+		Addr:         fmt.Sprintf(":%d", port),
 		Handler:      routesInstance.Echo,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,

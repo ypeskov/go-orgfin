@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"ypeskov/go-orgfin/internal/config"
 	"ypeskov/go-orgfin/internal/logger"
+	"ypeskov/go-orgfin/internal/migrations"
+
 	//"ypeskov/go-orgfin/internal/migrations"
 	"ypeskov/go-orgfin/internal/server"
 )
@@ -19,11 +21,10 @@ func main() {
 
 	appLogger := logger.New(cfg)
 
-	//we don't need to make migration every time
-	//err = migrations.MakeMigration(appLogger, cfg)
-	//if err != nil {
-	//	panic(fmt.Sprintf("cannot make migration: %s", err))
-	//}
+	err = migrations.MakeMigration(appLogger, cfg)
+	if err != nil {
+		panic(fmt.Sprintf("cannot make migration: %s", err))
+	}
 
 	appServer := server.New(cfg, appLogger)
 
