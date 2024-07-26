@@ -28,7 +28,7 @@ func main() {
 
 	appServer := server.New(cfg, appLogger)
 
-	openBrowser(fmt.Sprintf("http://localhost:%s", cfg.Port))
+	//openBrowser(fmt.Sprintf("http://localhost:%s", cfg.Port))
 
 	err = appServer.ListenAndServe()
 	if err != nil {
