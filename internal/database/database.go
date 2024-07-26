@@ -10,16 +10,16 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Service struct {
+type DbService struct {
 	Db    *sqlx.DB
 	DbUrl string
 }
 
 var (
-	dbInstance *Service
+	dbInstance *DbService
 )
 
-func New(cfg *config.Config) *Service {
+func New(cfg *config.Config) *DbService {
 	// Reuse Connection
 	if dbInstance != nil {
 		return dbInstance
@@ -29,7 +29,7 @@ func New(cfg *config.Config) *Service {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbInstance = &Service{
+	dbInstance = &DbService{
 		Db:    db,
 		DbUrl: cfg.DbUrl,
 	}

@@ -17,7 +17,7 @@ import (
 
 type Server struct {
 	port int
-	Db   database.Service
+	Db   database.DbService
 }
 
 func New(cfg *config.Config, logger *logger.Logger) *http.Server {

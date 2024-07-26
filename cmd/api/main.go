@@ -7,8 +7,6 @@ import (
 	"ypeskov/go-orgfin/internal/config"
 	"ypeskov/go-orgfin/internal/logger"
 	"ypeskov/go-orgfin/internal/migrations"
-
-	//"ypeskov/go-orgfin/internal/migrations"
 	"ypeskov/go-orgfin/internal/server"
 )
 
@@ -28,7 +26,7 @@ func main() {
 
 	appServer := server.New(cfg, appLogger)
 
-	openBrowser(fmt.Sprintf("http://localhost:%s", cfg.Port))
+	//openBrowser(fmt.Sprintf("http://localhost:%s", cfg.Port))
 
 	err = appServer.ListenAndServe()
 	if err != nil {
@@ -37,6 +35,9 @@ func main() {
 
 }
 
+/*
+openBrowser opens the default web browser at the specified URL.
+*/
 func openBrowser(url string) {
 	var cmd string
 	var args []string

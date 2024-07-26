@@ -17,8 +17,6 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 }
 
 func PasswordDetailsWebHandler(c echo.Context) error {
-	log.Info("PasswordDetailsWebHandler")
-
 	passwordId := c.Param("id")
 	password, err := sManager.PasswordService.GetPasswordById(passwordId)
 	if err != nil {
@@ -32,8 +30,6 @@ func PasswordDetailsWebHandler(c echo.Context) error {
 }
 
 func NewPasswordWebHandler(c echo.Context) error {
-	log.Info("NewPasswordWebHandler")
-
 	newPassword := models.Password{}
 
 	component := components.EditPassword(newPassword)
@@ -42,8 +38,6 @@ func NewPasswordWebHandler(c echo.Context) error {
 }
 
 func AddPassword(c echo.Context) error {
-	log.Info("AddPassword")
-
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
@@ -60,8 +54,6 @@ func AddPassword(c echo.Context) error {
 }
 
 func EditPasswordWebHandler(c echo.Context) error {
-	log.Info("EditPasswordWebHandler")
-
 	passwordId := c.Param("id")
 	password, err := sManager.PasswordService.GetPasswordById(passwordId)
 	if err != nil {
@@ -75,8 +67,6 @@ func EditPasswordWebHandler(c echo.Context) error {
 }
 
 func UpdatePassword(c echo.Context) error {
-	log.Info("UpdatePassword")
-
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)

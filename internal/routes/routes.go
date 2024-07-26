@@ -41,8 +41,6 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 }
 
 func HomeWebHandler(c echo.Context) error {
-	log.Info("HomeWebHandler")
-
 	passwords, err := sManager.PasswordService.GetAllPasswords()
 	if err != nil {
 		log.Errorf("Error getting all passwords: %e\n", err)

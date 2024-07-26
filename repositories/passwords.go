@@ -15,12 +15,12 @@ type PasswordsRepository interface {
 }
 
 type passRepoInstance struct {
-	db *database.Service
+	db *database.DbService
 }
 
 var log *logger.Logger
 
-func NewPasswordRepo(db *database.Service, logger *logger.Logger) PasswordsRepository {
+func NewPasswordRepo(db *database.DbService, logger *logger.Logger) PasswordsRepository {
 	log = logger
 
 	return &passRepoInstance{

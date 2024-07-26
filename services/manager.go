@@ -13,7 +13,7 @@ type ServiceManager struct {
 
 var log *logger.Logger
 
-func NewServiceManager(db *database.Service, logger *logger.Logger) *ServiceManager {
+func NewServiceManager(db *database.DbService, logger *logger.Logger) *ServiceManager {
 	log = logger
 
 	passwordRepo := repositories.NewPasswordRepo(db, logger)
