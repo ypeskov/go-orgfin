@@ -2,6 +2,8 @@ package routes
 
 import (
 	"github.com/a-h/templ"
+	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
@@ -35,7 +37,19 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 
 	e.GET("/", HomeWebHandler)
 
-	RegisterPasswordsRoutes(e.Group("/passwords"))
+	RegisterAuthRoutes(e.Group("/auth"))
+
+	jwtConfig := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(jwtCustomClaims)
+		},
+		SigningKey:   []byte("secret"),
+		ErrorHandler: customJWTErrorHandler,
+	}
+
+	passwordsRoutesGroup := e.Group("/passwords")
+	passwordsRoutesGroup.Use(echojwt.WithConfig(jwtConfig))
+	RegisterPasswordsRoutes(passwordsRoutesGroup)
 
 	return e
 }
