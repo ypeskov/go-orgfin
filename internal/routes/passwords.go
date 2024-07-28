@@ -7,17 +7,21 @@ import (
 	"ypeskov/go-orgfin/models"
 )
 
+type PasswordsRoutes struct{}
+
 func RegisterPasswordsRoutes(g *echo.Group) {
 	log.Info("Registering passwords routes")
-	g.GET("/new", NewPasswordWebHandler)
-	g.GET("/:id", PasswordDetailsWebHandler)
-	g.POST("", AddPassword)
-	g.POST("/:id", UpdatePassword)
-	g.GET("/:id/edit", EditPasswordWebHandler)
-	g.DELETE("/:id/delete", DeletePassword)
+
+	pr := PasswordsRoutes{}
+	g.GET("/new", pr.NewPasswordWebHandler)
+	g.GET("/:id", pr.PasswordDetailsWebHandler)
+	g.POST("", pr.AddPassword)
+	g.POST("/:id", pr.UpdatePassword)
+	g.GET("/:id/edit", pr.EditPasswordWebHandler)
+	g.DELETE("/:id/delete", pr.DeletePassword)
 }
 
-func PasswordDetailsWebHandler(c echo.Context) error {
+func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
 	passwordId := c.Param("id")
 	password, err := sManager.PasswordService.GetPasswordById(passwordId)
 	if err != nil {
@@ -30,7 +34,7 @@ func PasswordDetailsWebHandler(c echo.Context) error {
 	return Render(c, http.StatusOK, component)
 }
 
-func NewPasswordWebHandler(c echo.Context) error {
+func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
 	newPassword := models.Password{}
 
 	component := components.PasswordForm(newPassword)
@@ -38,7 +42,7 @@ func NewPasswordWebHandler(c echo.Context) error {
 	return Render(c, http.StatusOK, component)
 }
 
-func AddPassword(c echo.Context) error {
+func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
@@ -54,7 +58,7 @@ func AddPassword(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
-func EditPasswordWebHandler(c echo.Context) error {
+func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 	passwordId := c.Param("id")
 	password, err := sManager.PasswordService.GetPasswordById(passwordId)
 	if err != nil {
@@ -67,7 +71,7 @@ func EditPasswordWebHandler(c echo.Context) error {
 	return Render(c, http.StatusOK, component)
 }
 
-func UpdatePassword(c echo.Context) error {
+func (pr *PasswordsRoutes) UpdatePassword(c echo.Context) error {
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
@@ -83,7 +87,7 @@ func UpdatePassword(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
-func DeletePassword(c echo.Context) error {
+func (pr *PasswordsRoutes) DeletePassword(c echo.Context) error {
 	passwordId := c.Param("id")
 	err := sManager.PasswordService.DeletePassword(passwordId)
 	if err != nil {
