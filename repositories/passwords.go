@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"fmt"
-	"ypeskov/go-orgfin/internal/database"
-	"ypeskov/go-orgfin/internal/logger"
-	"ypeskov/go-orgfin/models"
+	"ypeskov/go-password-manager/internal/database"
+	"ypeskov/go-password-manager/internal/logger"
+	"ypeskov/go-password-manager/models"
 )
 
 type PasswordsRepository interface {

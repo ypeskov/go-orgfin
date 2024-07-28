@@ -5,14 +5,13 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"ypeskov/go-orgfin/internal/logger"
-	"ypeskov/go-orgfin/internal/routes"
-	"ypeskov/go-orgfin/services"
+	"ypeskov/go-password-manager/internal/config"
+	"ypeskov/go-password-manager/internal/database"
+	"ypeskov/go-password-manager/internal/logger"
+	"ypeskov/go-password-manager/internal/routes"
+	"ypeskov/go-password-manager/services"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"ypeskov/go-orgfin/internal/config"
-	"ypeskov/go-orgfin/internal/database"
 )
 
 type Server struct {

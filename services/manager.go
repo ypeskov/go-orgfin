@@ -1,9 +1,9 @@
 package services
 
 import (
-	"ypeskov/go-orgfin/internal/database"
-	"ypeskov/go-orgfin/internal/logger"
-	"ypeskov/go-orgfin/repositories"
+	"ypeskov/go-password-manager/internal/database"
+	"ypeskov/go-password-manager/internal/logger"
+	"ypeskov/go-password-manager/repositories"
 )
 
 type ServiceManager struct {

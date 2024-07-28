@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
-	"ypeskov/go-orgfin/internal/config"
-	"ypeskov/go-orgfin/internal/logger"
-	"ypeskov/go-orgfin/internal/migrations"
-	"ypeskov/go-orgfin/internal/server"
+	"ypeskov/go-password-manager/internal/config"
+	"ypeskov/go-password-manager/internal/logger"
+	"ypeskov/go-password-manager/internal/migrations"
+	"ypeskov/go-password-manager/internal/server"
 )
 
 func main() {

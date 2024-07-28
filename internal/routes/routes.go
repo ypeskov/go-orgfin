@@ -2,13 +2,15 @@ package routes
 
 import (
 	"github.com/a-h/templ"
+	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
-	"ypeskov/go-orgfin/cmd/web"
-	"ypeskov/go-orgfin/cmd/web/components"
-	"ypeskov/go-orgfin/internal/logger"
-	"ypeskov/go-orgfin/services"
+	"ypeskov/go-password-manager/cmd/web"
+	"ypeskov/go-password-manager/cmd/web/components"
+	"ypeskov/go-password-manager/internal/logger"
+	"ypeskov/go-password-manager/services"
 )
 
 type Routes struct {
@@ -35,7 +37,19 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 
 	e.GET("/", HomeWebHandler)
 
-	RegisterPasswordsRoutes(e.Group("/passwords"))
+	RegisterAuthRoutes(e.Group("/auth"))
+
+	jwtConfig := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(jwtCustomClaims)
+		},
+		SigningKey:   []byte("secret"),
+		ErrorHandler: customJWTErrorHandler,
+	}
+
+	passwordsRoutesGroup := e.Group("/passwords")
+	passwordsRoutesGroup.Use(echojwt.WithConfig(jwtConfig))
+	RegisterPasswordsRoutes(passwordsRoutesGroup)
 
 	return e
 }
@@ -57,6 +71,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	defer templ.ReleaseBuffer(buf)
 
 	if err := t.Render(ctx.Request().Context(), buf); err != nil {
+		log.Errorf("Error rendering component: %e\n", err)
 		return err
 	}
 

@@ -1,4 +1,4 @@
-module ypeskov/go-orgfin
+module ypeskov/go-password-manager
 
 go 1.22.3
 
@@ -6,9 +6,11 @@ require (
 	github.com/a-h/templ v0.2.747
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/sirupsen/logrus v1.9.3

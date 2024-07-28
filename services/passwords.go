@@ -1,8 +1,8 @@
 package services
 
 import (
-	"ypeskov/go-orgfin/models"
-	"ypeskov/go-orgfin/repositories"
+	"ypeskov/go-password-manager/models"
+	"ypeskov/go-password-manager/repositories"
 )
 
 type PasswordsService interface {
@@ -13,17 +13,17 @@ type PasswordsService interface {
 	DeletePassword(id string) error
 }
 
-type Passwords struct {
+type passwordServiceInstance struct {
 	PasswordRepo repositories.PasswordsRepository
 }
 
 func NewPasswordService(passwordRepo *repositories.PasswordsRepository) PasswordsService {
-	return &Passwords{
+	return &passwordServiceInstance{
 		PasswordRepo: *passwordRepo,
 	}
 }
 
-func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
+func (p *passwordServiceInstance) GetAllPasswords() ([]*models.Password, error) {
 	passwords, err := p.PasswordRepo.GetAllPasswords()
 	if err != nil {
 		log.Errorln("Error getting all passwords: %e\n", err)
@@ -33,7 +33,7 @@ func (p *Passwords) GetAllPasswords() ([]*models.Password, error) {
 	return passwords, nil
 }
 
-func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
+func (p *passwordServiceInstance) GetPasswordById(id string) (*models.Password, error) {
 	password, err := p.PasswordRepo.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
@@ -43,7 +43,7 @@ func (p *Passwords) GetPasswordById(id string) (*models.Password, error) {
 	return password, nil
 }
 
-func (p *Passwords) AddPassword(password *models.Password) error {
+func (p *passwordServiceInstance) AddPassword(password *models.Password) error {
 	err := p.PasswordRepo.AddPassword(password)
 	if err != nil {
 		log.Errorf("Error adding password: %e\n", err)
@@ -53,7 +53,7 @@ func (p *Passwords) AddPassword(password *models.Password) error {
 	return nil
 }
 
-func (p *Passwords) UpdatePassword(password *models.Password) error {
+func (p *passwordServiceInstance) UpdatePassword(password *models.Password) error {
 	err := p.PasswordRepo.UpdatePassword(password)
 	if err != nil {
 		log.Errorf("Error updating password: %e\n", err)
@@ -63,7 +63,7 @@ func (p *Passwords) UpdatePassword(password *models.Password) error {
 	return nil
 }
 
-func (p *Passwords) DeletePassword(id string) error {
+func (p *passwordServiceInstance) DeletePassword(id string) error {
 	err := p.PasswordRepo.DeletePassword(id)
 	if err != nil {
 		log.Errorf("Error deleting password: %e\n", err)
