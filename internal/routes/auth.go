@@ -50,6 +50,8 @@ func RegisterAuthRoutes(g *echo.Group) {
 	ar := AuthRoutes{}
 	g.GET("/login", ar.LoginForm)
 	g.POST("/login", ar.Login)
+	g.GET("/register", ar.RegisterForm)
+	g.POST("/register", ar.Register)
 }
 
 func (ar *AuthRoutes) LoginForm(c echo.Context) error {
@@ -87,5 +89,38 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"token": t,
+	})
+}
+
+func (ar *AuthRoutes) RegisterForm(c echo.Context) error {
+	component := auth.RegisterForm()
+
+	return Render(c, http.StatusOK, component)
+}
+
+func (ar *AuthRoutes) Register(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	confirmPassword := c.FormValue("confirm_password")
+	log.Infof("Registration attempt, username: [%s]\n", username)
+
+	if username == "" || password == "" || confirmPassword == "" {
+		log.Warnf("Invalid registration attempt: missing fields: [username] or [password] or [confirm_password]")
+		return echo.ErrBadRequest
+	}
+
+	if password != confirmPassword {
+		log.Printf("Invalid registration attempt: passwords do not match")
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"error": "Passwords do not match",
+		})
+	}
+
+	// Add logic to save the new user to the database
+	// Example: user, err := saveUserToDatabase(username, password)
+
+	// For demonstration purposes, we just return a success message
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "User registered successfully",
 	})
 }

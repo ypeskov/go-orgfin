@@ -2,7 +2,6 @@ package logger
 
 import (
 	log "github.com/sirupsen/logrus"
-	"path"
 	"runtime"
 	"ypeskov/go-password-manager/internal/config"
 )
@@ -18,10 +17,10 @@ func (hook ContextHook) Levels() []log.Level {
 }
 
 func (hook ContextHook) Fire(entry *log.Entry) error {
-	if pc, file, line, ok := runtime.Caller(8); ok {
+	if pc, _, line, ok := runtime.Caller(8); ok {
 		funcName := runtime.FuncForPC(pc).Name()
-		entry.Data["file"] = path.Base(file)
-		entry.Data["func"] = path.Base(funcName)
+		entry.Data["func"] = funcName
+		//entry.Data["func"] = path.Base(funcName)
 		entry.Data["line"] = line
 	}
 
