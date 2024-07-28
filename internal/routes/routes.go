@@ -5,10 +5,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
-	"ypeskov/go-orgfin/cmd/web"
-	"ypeskov/go-orgfin/cmd/web/components"
-	"ypeskov/go-orgfin/internal/logger"
-	"ypeskov/go-orgfin/services"
+	"ypeskov/go-password-manager/cmd/web"
+	"ypeskov/go-password-manager/cmd/web/components"
+	"ypeskov/go-password-manager/internal/logger"
+	"ypeskov/go-password-manager/services"
 )
 
 type Routes struct {
@@ -57,6 +57,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	defer templ.ReleaseBuffer(buf)
 
 	if err := t.Render(ctx.Request().Context(), buf); err != nil {
+		log.Errorf("Error rendering component: %e\n", err)
 		return err
 	}
 

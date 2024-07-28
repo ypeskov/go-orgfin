@@ -8,8 +8,8 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"os"
-	"ypeskov/go-orgfin/internal/config"
-	"ypeskov/go-orgfin/internal/logger"
+	"ypeskov/go-password-manager/internal/config"
+	"ypeskov/go-password-manager/internal/logger"
 
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"

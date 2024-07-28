@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"path"
 	"runtime"
-	"ypeskov/go-orgfin/internal/config"
+	"ypeskov/go-password-manager/internal/config"
 )
 
 type Logger struct {

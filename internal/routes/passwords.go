@@ -3,8 +3,8 @@ package routes
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"ypeskov/go-orgfin/cmd/web/components"
-	"ypeskov/go-orgfin/models"
+	"ypeskov/go-password-manager/cmd/web/components"
+	"ypeskov/go-password-manager/models"
 )
 
 type PasswordsRoutes struct{}
