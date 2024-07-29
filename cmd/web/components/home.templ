@@ -11,16 +11,10 @@ templ HomePage() {
 
 			<p class="text-lg">Welcome to the Password Manager</p>
 			<div class="flex">
-				<a href="javascript:void(0)"
-					 hx-get="/auth/login"
-					 hx-target="#main-content"
-					 hx-swap="innerHTML"
+				<a href="/auth/login"
 					 class="bg-indigo-600 text-white p-2 rounded-md mr-4">Login</a>
 
-				<a href="javascript:void(0)"
-					 hx-get="/auth/register"
-					 hx-target="#main-content"
-					 hx-swap="innerHTML"
+				<a href="/auth/register"
 					 class="bg-indigo-600 text-white p-2 rounded-md">Create User</a>
 			</div>
 		</div>

@@ -11,6 +11,7 @@ import (
 	"ypeskov/go-password-manager/cmd/web/components"
 	"ypeskov/go-password-manager/internal/config"
 	"ypeskov/go-password-manager/internal/logger"
+	customMiddleware "ypeskov/go-password-manager/internal/middleware"
 	"ypeskov/go-password-manager/services"
 )
 
@@ -28,6 +29,7 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 
 	//e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(customMiddleware.CookieToHeaderMiddleware)
 
 	fileServer := http.FileServer(http.FS(web.Files))
 	e.GET("/assets/*", echo.WrapHandler(fileServer))
@@ -54,14 +56,9 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 func HomeWebHandler(c echo.Context) error {
 	claims, err := getUserFromToken(c, cfg)
 	if err == nil && claims != nil {
-		return c.Redirect(http.StatusSeeOther, "/passwords")
+		log.Infof("Home page requested by user: %s\n", claims.Username)
+		return c.Redirect(http.StatusFound, "/passwords")
 	}
-	log.Infof("Home page requested\n")
-	//passwords, err := sManager.PasswordService.GetAllPasswords()
-	//if err != nil {
-	//	log.Errorf("Error getting all passwords: %e\n", err)
-	//	return err
-	//}
 
 	component := components.HomePage()
 

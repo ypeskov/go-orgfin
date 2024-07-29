@@ -13,12 +13,25 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 	log.Info("Registering passwords routes")
 
 	pr := PasswordsRoutes{}
+	g.GET("", pr.PasswordsListWeb)
 	g.GET("/new", pr.NewPasswordWebHandler)
 	g.GET("/:id", pr.PasswordDetailsWebHandler)
 	g.POST("", pr.AddPassword)
 	g.POST("/:id", pr.UpdatePassword)
 	g.GET("/:id/edit", pr.EditPasswordWebHandler)
 	g.DELETE("/:id/delete", pr.DeletePassword)
+}
+
+func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
+	passwords, err := sManager.PasswordService.GetAllPasswords()
+	if err != nil {
+		log.Errorf("Error getting all passwords: %e\n", err)
+		return err
+	}
+
+	component := components.ListOfPasswords(passwords)
+
+	return Render(c, http.StatusOK, component)
 }
 
 func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {

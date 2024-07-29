@@ -41,10 +41,7 @@ func customJWTErrorHandler(c echo.Context, err error) error {
 	// Log the error
 	log.Errorf("JWT error: %s\n", message)
 
-	// Return an appropriate response
-	return c.JSON(http.StatusUnauthorized, echo.Map{
-		"error": message,
-	})
+	return c.Redirect(http.StatusFound, "/auth/login")
 }
 
 func getUserFromToken(c echo.Context, cfg *config.Config) (*jwtCustomClaims, error) {
@@ -115,9 +112,15 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"token": t,
+	c.SetCookie(&http.Cookie{
+		Name:     "auth_token",
+		Value:    t,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
 	})
+
+	return c.Redirect(http.StatusFound, "/")
 }
 
 func (ar *AuthRoutes) RegisterForm(c echo.Context) error {
