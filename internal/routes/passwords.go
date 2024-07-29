@@ -37,7 +37,7 @@ func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
-	log.Infof("Password details page requested, id: [%s]\n", c.Param("id"))
+	log.Infof("Password Record details page requested, id: [%s]\n", c.Param("id"))
 	passwordId := c.Param("id")
 	id, err := strconv.Atoi(passwordId)
 	if err != nil {
@@ -71,6 +71,7 @@ func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
+	log.Infof("Adding new password: %+v\n", password)
 
 	err := sManager.PasswordService.AddPassword(&password)
 	if err != nil {
@@ -83,6 +84,7 @@ func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
 
 func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 	passwordId := c.Param("id")
+	log.Infof("Edit password page requested, id: [%s]\n", passwordId)
 	id, err := strconv.Atoi(passwordId)
 	if err != nil {
 		log.Errorf("Error converting password id to int: %e\n", err)
@@ -101,12 +103,13 @@ func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) UpdatePassword(c echo.Context) error {
+	log.Infof("Updating password\n")
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
-
+	log.Infof("Updating password with id: %+v\n", password)
 	err := sManager.PasswordService.UpdatePassword(&password)
 	if err != nil {
 		log.Errorf("Error updating password: %e\n", err)

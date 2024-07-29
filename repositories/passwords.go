@@ -53,7 +53,9 @@ func (p *passRepoInstance) GetPasswordById(id int) (*models.Password, error) {
 }
 
 func (p *passRepoInstance) AddPassword(password *models.Password) error {
-	_, err := p.db.Db.NamedExec("INSERT INTO passwords (name, url, password) VALUES (:name, :url, :password)",
+	log.Debugf("Adding password %v", password)
+	_, err := p.db.Db.NamedExec(`INSERT INTO passwords (name, resource, password, salt, iv) 
+		VALUES (:name, :resource, :password, :salt, :iv)`,
 		password)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error adding password: %v", err))
@@ -64,7 +66,8 @@ func (p *passRepoInstance) AddPassword(password *models.Password) error {
 }
 
 func (p *passRepoInstance) UpdatePassword(password *models.Password) error {
-	_, err := p.db.Db.NamedExec("UPDATE passwords SET name = :name, url = :url, password = :password WHERE id = :id",
+	_, err := p.db.Db.NamedExec(`UPDATE passwords SET name = :name, resource = :resource,
+                     password = :password WHERE id = :id`,
 		password)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error updating password: %v", err))
