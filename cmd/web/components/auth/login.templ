@@ -6,6 +6,8 @@ import (
 
 templ LoginForm() {
 	@layouts.Base() {
+		<a href="/" class="bg-blue-600 text-white rounded-md p-2">Back</a>
+
 		<div class="space-y-4 p-6 bg-white shadow-md rounded-md">
 			<form action="/auth/login" method="post">
 				<div class="flex flex-col space-y-4 w-3/4 mx-auto">
@@ -30,6 +32,8 @@ templ LoginForm() {
 
 templ RegisterForm() {
 	@layouts.Base() {
+		<a href="/" class="bg-blue-600 text-white rounded-md p-2">Back</a>
+
 		<div class="space-y-4 p-6 bg-white shadow-md rounded-md">
 			<form action="/auth/register" method="post">
 				<div class="flex flex-col space-y-4 w-3/4 mx-auto">

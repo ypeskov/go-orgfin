@@ -5,8 +5,10 @@ import "github.com/go-playground/validator"
 type Password struct {
 	Id       int    `json:"id" form:"id"`
 	Name     string `json:"name" form:"name" validate:"required"`
-	Url      string `json:"url" form:"url"`
+	Resource string `json:"resource" form:"resource"`
 	Password string `json:"password" form:"password" validate:"required"`
+	Salt     string `json:"salt" form:"salt"`
+	Iv       string `json:"iv" form:"iv"`
 }
 
 func (p *Password) Validate() error {

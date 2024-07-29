@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 	"ypeskov/go-password-manager/cmd/web/components"
 	"ypeskov/go-password-manager/models"
 )
@@ -13,17 +14,38 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 	log.Info("Registering passwords routes")
 
 	pr := PasswordsRoutes{}
+
 	g.GET("/new", pr.NewPasswordWebHandler)
 	g.GET("/:id", pr.PasswordDetailsWebHandler)
+	g.GET("", pr.PasswordsListWeb)
 	g.POST("", pr.AddPassword)
 	g.POST("/:id", pr.UpdatePassword)
 	g.GET("/:id/edit", pr.EditPasswordWebHandler)
 	g.DELETE("/:id/delete", pr.DeletePassword)
 }
 
+func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
+	passwords, err := sManager.PasswordService.GetAllPasswords()
+	if err != nil {
+		log.Errorf("Error getting all passwords: %e\n", err)
+		return err
+	}
+
+	component := components.ListOfPasswords(passwords)
+
+	return Render(c, http.StatusOK, component)
+}
+
 func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
+	log.Infof("Password Record details page requested, id: [%s]\n", c.Param("id"))
 	passwordId := c.Param("id")
-	password, err := sManager.PasswordService.GetPasswordById(passwordId)
+	id, err := strconv.Atoi(passwordId)
+	if err != nil {
+		log.Errorf("Error converting password id to int: %e\n", err)
+		return err
+	}
+
+	password, err := sManager.PasswordService.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
 		return err
@@ -35,6 +57,7 @@ func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
+	log.Infof("New password page requested\n")
 	newPassword := models.Password{}
 
 	component := components.PasswordForm(newPassword)
@@ -48,6 +71,7 @@ func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
+	log.Infof("Adding new password: %+v\n", password)
 
 	err := sManager.PasswordService.AddPassword(&password)
 	if err != nil {
@@ -60,7 +84,14 @@ func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
 
 func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 	passwordId := c.Param("id")
-	password, err := sManager.PasswordService.GetPasswordById(passwordId)
+	log.Infof("Edit password page requested, id: [%s]\n", passwordId)
+	id, err := strconv.Atoi(passwordId)
+	if err != nil {
+		log.Errorf("Error converting password id to int: %e\n", err)
+		return err
+	}
+
+	password, err := sManager.PasswordService.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
 		return err
@@ -72,12 +103,13 @@ func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) UpdatePassword(c echo.Context) error {
+	log.Infof("Updating password\n")
 	password := models.Password{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
-
+	log.Infof("Updating password with id: %+v\n", password)
 	err := sManager.PasswordService.UpdatePassword(&password)
 	if err != nil {
 		log.Errorf("Error updating password: %e\n", err)

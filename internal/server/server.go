@@ -24,7 +24,7 @@ func New(cfg *config.Config, logger *logger.Logger) *http.Server {
 	db := *database.New(cfg)
 
 	servicesManager := services.NewServiceManager(&db, logger)
-	echo := routes.RegisterRoutes(logger, servicesManager)
+	echo := routes.RegisterRoutes(logger, servicesManager, cfg)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),

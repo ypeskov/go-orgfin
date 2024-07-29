@@ -21,6 +21,26 @@ async function getKey(key, salt) {
     );
 }
 
+function base64ToArrayBuffer(base64) {
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
 async function encrypt(text, key) {
     const enc = new TextEncoder();
     const encoded = enc.encode(text);
@@ -32,36 +52,23 @@ async function encrypt(text, key) {
         cryptoKey,
         encoded
     );
-    return {
-        data: Array.from(new Uint8Array(ciphertext)),
-        salt: Array.from(salt),
-        iv: Array.from(iv)
+
+    const encData = {
+        data: arrayBufferToBase64(ciphertext),
+        salt: arrayBufferToBase64(salt),
+        iv: arrayBufferToBase64(iv)
     };
+
+    return encData;
 }
 
-async function decrypt(encrypted, key) {
-    const { data, salt, iv } = encrypted;
+async function decrypt(encryptedData, key, salt, iv) {
     const cryptoKey = await getKey(key, new Uint8Array(salt));
     const decrypted = await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: new Uint8Array(iv) },
         cryptoKey,
-        new Uint8Array(data)
+        new Uint8Array(encryptedData)
     );
     const dec = new TextDecoder();
     return dec.decode(decrypted);
-}
-
-async function handleEncryption() {
-    const text = document.getElementById('text').value;
-    const key = document.getElementById('key').value;
-    const encrypted = await encrypt(text, key);
-    document.getElementById('encrypted').textContent = JSON.stringify(encrypted);
-}
-
-async function handleDecryption() {
-    const encryptedText = document.getElementById('encryptedText').value;
-    const key = document.getElementById('keyDecrypt').value;
-    const encrypted = JSON.parse(encryptedText);
-    const decrypted = await decrypt(encrypted, key);
-    document.getElementById('decrypted').textContent = decrypted;
 }

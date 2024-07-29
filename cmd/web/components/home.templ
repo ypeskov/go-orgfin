@@ -1,0 +1,22 @@
+package components
+
+import (
+	"ypeskov/go-password-manager/cmd/web/layouts"
+)
+
+templ HomePage() {
+	@layouts.Base() {
+		<div class="space-y-4 p-6 bg-white shadow-md rounded-md">
+			<h1 class="text-2xl font-semibold">Home</h1>
+
+			<p class="text-lg">Welcome to the Password Manager</p>
+			<div class="flex">
+				<a href="/auth/login"
+					 class="bg-indigo-600 text-white p-2 rounded-md mr-4">Login</a>
+
+				<a href="/auth/register"
+					 class="bg-indigo-600 text-white p-2 rounded-md">Create User</a>
+			</div>
+		</div>
+	}
+}

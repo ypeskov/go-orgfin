@@ -7,7 +7,7 @@ import (
 
 type PasswordsService interface {
 	GetAllPasswords() ([]*models.Password, error)
-	GetPasswordById(id string) (*models.Password, error)
+	GetPasswordById(id int) (*models.Password, error)
 	AddPassword(password *models.Password) error
 	UpdatePassword(password *models.Password) error
 	DeletePassword(id string) error
@@ -33,7 +33,7 @@ func (p *passwordServiceInstance) GetAllPasswords() ([]*models.Password, error) 
 	return passwords, nil
 }
 
-func (p *passwordServiceInstance) GetPasswordById(id string) (*models.Password, error) {
+func (p *passwordServiceInstance) GetPasswordById(id int) (*models.Password, error) {
 	password, err := p.PasswordRepo.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)

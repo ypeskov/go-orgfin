@@ -6,30 +6,33 @@ templ Base() {
 		<head>
 			<meta charset="utf-8"/>
 			<title>Golang + HTML + Templ one file password manager</title>
+			<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon"/>
 			<link href="/assets/css/output.css" rel="stylesheet"/>
 			<script src="/assets/js/htmx.min.js"></script>
 		</head>
 		<body hx-boost="true" class="h-screen flex flex-col">
-				<div class="flex items-center p-6 bg-gray-800">
-      				<a href="/" class="text-white text-2xl font-bold hover:text-gray-400">
-      					<svg class="w-8 h-8 inline-block mr-2"
-      							fill="none"
-      							stroke="currentColor"
-      							viewBox="0 0 24 24"
-      							xmlns="http://www.w3.org/2000/svg">
-      							<path stroke-linecap="round"
-      										stroke-linejoin="round"
-      										stroke-width="2"
-      										d="M12 11c0-1.65 1.35-3 3-3s3 1.35 3 3v1h1c1.65 0 3 1.35 3 3v4c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3v-4c0-1.65 1.35-3 3-3h1v-1c0-1.65 1.35-3 3-3s3 1.35 3 3v1zm-3 6v-1a1 1 0 112 0v1a1 1 0 01-2 0zm6 0v-1a1 1 0 112 0v1a1 1 0 01-2 0z"/></svg>
-      					Password Manager
-      				</a>
-      			</div>
-
-				<main class="flex-grow">
-					<div id="main-content" class="h-full space-y-4 p-6 bg-slate-300 shadow-md rounded-md">
-						{ children... }
+			<div class="flex items-center p-6 bg-gray-800">
+						<a href="/" class="text-white text-2xl font-bold hover:text-gray-400">
+							<svg class="w-8 h-8 inline-block mr-2"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg">
+									<path stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 11c0-1.65 1.35-3 3-3s3 1.35 3 3v1h1c1.65 0 3 1.35 3 3v4c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3v-4c0-1.65 1.35-3 3-3h1v-1c0-1.65 1.35-3 3-3s3 1.35 3 3v1zm-3 6v-1a1 1 0 112 0v1a1 1 0 01-2 0zm6 0v-1a1 1 0 112 0v1a1 1 0 01-2 0z"/></svg>
+							Password Manager
+						</a>
 					</div>
-				</main>
+
+			<main class="flex-grow">
+				<div id="main-content" class="h-full space-y-4 p-6 bg-slate-300 shadow-md rounded-md">
+					{ children... }
+				</div>
+			</main>
+
+			<script src="/assets/js/crypto.js"></script>
 		</body>
 	</html>
 }
