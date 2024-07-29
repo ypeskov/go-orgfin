@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 	"ypeskov/go-password-manager/cmd/web/components"
 	"ypeskov/go-password-manager/models"
 )
@@ -13,9 +14,10 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 	log.Info("Registering passwords routes")
 
 	pr := PasswordsRoutes{}
-	g.GET("", pr.PasswordsListWeb)
+
 	g.GET("/new", pr.NewPasswordWebHandler)
 	g.GET("/:id", pr.PasswordDetailsWebHandler)
+	g.GET("", pr.PasswordsListWeb)
 	g.POST("", pr.AddPassword)
 	g.POST("/:id", pr.UpdatePassword)
 	g.GET("/:id/edit", pr.EditPasswordWebHandler)
@@ -35,8 +37,15 @@ func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
+	log.Infof("Password details page requested, id: [%s]\n", c.Param("id"))
 	passwordId := c.Param("id")
-	password, err := sManager.PasswordService.GetPasswordById(passwordId)
+	id, err := strconv.Atoi(passwordId)
+	if err != nil {
+		log.Errorf("Error converting password id to int: %e\n", err)
+		return err
+	}
+
+	password, err := sManager.PasswordService.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
 		return err
@@ -48,6 +57,7 @@ func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
+	log.Infof("New password page requested\n")
 	newPassword := models.Password{}
 
 	component := components.PasswordForm(newPassword)
@@ -73,7 +83,13 @@ func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
 
 func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 	passwordId := c.Param("id")
-	password, err := sManager.PasswordService.GetPasswordById(passwordId)
+	id, err := strconv.Atoi(passwordId)
+	if err != nil {
+		log.Errorf("Error converting password id to int: %e\n", err)
+		return err
+	}
+
+	password, err := sManager.PasswordService.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
 		return err

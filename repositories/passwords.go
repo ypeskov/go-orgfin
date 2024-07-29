@@ -9,7 +9,7 @@ import (
 
 type PasswordsRepository interface {
 	GetAllPasswords() ([]*models.Password, error)
-	GetPasswordById(id string) (*models.Password, error)
+	GetPasswordById(id int) (*models.Password, error)
 	AddPassword(password *models.Password) error
 	UpdatePassword(password *models.Password) error
 	DeletePassword(id string) error
@@ -40,8 +40,9 @@ func (p *passRepoInstance) GetAllPasswords() ([]*models.Password, error) {
 	return passwords, nil
 }
 
-func (p *passRepoInstance) GetPasswordById(id string) (*models.Password, error) {
+func (p *passRepoInstance) GetPasswordById(id int) (*models.Password, error) {
 	var password models.Password
+
 	err := p.db.Db.Get(&password, "SELECT * FROM passwords WHERE id = $1", id)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error getting password by id: %v", err))
