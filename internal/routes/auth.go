@@ -5,17 +5,20 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strings"
 	"time"
 	"ypeskov/go-password-manager/cmd/web/components/auth"
+	"ypeskov/go-password-manager/internal/config"
 )
 
 type jwtCustomClaims struct {
-	Name  string `json:"name"`
-	Admin bool   `json:"admin"`
+	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
 
-type AuthRoutes struct{}
+type AuthRoutes struct {
+	cfg *config.Config
+}
 
 // Custom error handler for JWT
 func customJWTErrorHandler(c echo.Context, err error) error {
@@ -44,10 +47,36 @@ func customJWTErrorHandler(c echo.Context, err error) error {
 	})
 }
 
-func RegisterAuthRoutes(g *echo.Group) {
+func getUserFromToken(c echo.Context, cfg *config.Config) (*jwtCustomClaims, error) {
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return nil, errors.New("missing Authorization header")
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	token, err := jwt.ParseWithClaims(tokenString, &jwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(cfg.SecretKey), nil
+	})
+	if err != nil {
+		log.Errorf("Error parsing JWT: %s\n", err)
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*jwtCustomClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		log.Errorf("Invalid JWT: %s\n", err)
+		return nil, err
+	}
+}
+
+func RegisterAuthRoutes(g *echo.Group, cfg *config.Config) {
 	log.Info("Registering auth routes")
 
-	ar := AuthRoutes{}
+	ar := AuthRoutes{
+		cfg: cfg,
+	}
 	g.GET("/login", ar.LoginForm)
 	g.POST("/login", ar.Login)
 	g.GET("/register", ar.RegisterForm)
@@ -71,10 +100,9 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 	}
 
 	claims := &jwtCustomClaims{
-		"Jon Snow",
-		true,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+		Username: "Jon Snow",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 		},
 	}
 
@@ -82,7 +110,7 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte(ar.cfg.SecretKey))
 	if err != nil {
 		return err
 	}

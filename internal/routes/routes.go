@@ -9,20 +9,17 @@ import (
 	"net/http"
 	"ypeskov/go-password-manager/cmd/web"
 	"ypeskov/go-password-manager/cmd/web/components"
+	"ypeskov/go-password-manager/internal/config"
 	"ypeskov/go-password-manager/internal/logger"
 	"ypeskov/go-password-manager/services"
 )
 
-type Routes struct {
-	logger          *logger.Logger
-	Echo            *echo.Echo
-	ServicesManager *services.ServiceManager
-}
-
 var log *logger.Logger
 var sManager *services.ServiceManager
+var cfg *config.Config
 
-func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceManager) *echo.Echo {
+func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceManager, configInstance *config.Config) *echo.Echo {
+	cfg = configInstance
 	log = logger
 	log.Info("Registering routes")
 	e := echo.New()
@@ -37,13 +34,13 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 
 	e.GET("/", HomeWebHandler)
 
-	RegisterAuthRoutes(e.Group("/auth"))
+	RegisterAuthRoutes(e.Group("/auth"), cfg)
 
 	jwtConfig := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(jwtCustomClaims)
 		},
-		SigningKey:   []byte("secret"),
+		SigningKey:   []byte(cfg.SecretKey),
 		ErrorHandler: customJWTErrorHandler,
 	}
 
@@ -55,13 +52,18 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 }
 
 func HomeWebHandler(c echo.Context) error {
-	passwords, err := sManager.PasswordService.GetAllPasswords()
-	if err != nil {
-		log.Errorf("Error getting all passwords: %e\n", err)
-		return err
+	claims, err := getUserFromToken(c, cfg)
+	if err == nil && claims != nil {
+		return c.Redirect(http.StatusSeeOther, "/passwords")
 	}
+	log.Infof("Home page requested\n")
+	//passwords, err := sManager.PasswordService.GetAllPasswords()
+	//if err != nil {
+	//	log.Errorf("Error getting all passwords: %e\n", err)
+	//	return err
+	//}
 
-	component := components.ListOfPasswords(passwords)
+	component := components.HomePage()
 
 	return Render(c, http.StatusOK, component)
 }
