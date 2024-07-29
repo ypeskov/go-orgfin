@@ -62,29 +62,13 @@ async function encrypt(text, key) {
     return encData;
 }
 
-async function decrypt(encrypted, key) {
-    const { data, salt, iv } = encrypted;
+async function decrypt(encryptedData, key, salt, iv) {
     const cryptoKey = await getKey(key, new Uint8Array(salt));
     const decrypted = await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: new Uint8Array(iv) },
         cryptoKey,
-        new Uint8Array(data)
+        new Uint8Array(encryptedData)
     );
     const dec = new TextDecoder();
     return dec.decode(decrypted);
-}
-
-async function handleEncryption() {
-    const text = document.getElementById('text').value;
-    const key = document.getElementById('key').value;
-    const encrypted = await encrypt(text, key);
-    document.getElementById('encrypted').textContent = JSON.stringify(encrypted);
-}
-
-async function handleDecryption() {
-    const encryptedText = document.getElementById('encryptedText').value;
-    const key = document.getElementById('keyDecrypt').value;
-    const encrypted = JSON.parse(encryptedText);
-    const decrypted = await decrypt(encrypted, key);
-    document.getElementById('decrypted').textContent = decrypted;
 }
