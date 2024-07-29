@@ -118,6 +118,7 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   false,
 		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	return c.Redirect(http.StatusFound, "/")
