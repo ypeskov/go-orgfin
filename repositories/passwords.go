@@ -67,7 +67,7 @@ func (p *passRepoInstance) AddPassword(password *models.Password) error {
 
 func (p *passRepoInstance) UpdatePassword(password *models.Password) error {
 	_, err := p.db.Db.NamedExec(`UPDATE passwords SET name = :name, resource = :resource,
-                     password = :password WHERE id = :id`,
+                     password = :password, salt = :salt, iv = :iv WHERE id = :id`,
 		password)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error updating password: %v", err))
