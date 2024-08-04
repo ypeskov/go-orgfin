@@ -5,7 +5,7 @@ import (
 	"ypeskov/go-password-manager/repositories"
 )
 
-type PasswordsService interface {
+type EncryptedPasswordsService interface {
 	GetAllPasswords() ([]*models.EncryptedPassword, error)
 	GetPasswordById(id int) (*models.EncryptedPassword, error)
 	AddPassword(password *models.EncryptedPassword) error
@@ -17,7 +17,7 @@ type passwordServiceInstance struct {
 	PasswordRepo repositories.EncryptedPasswordsRepository
 }
 
-func NewPasswordService(passwordRepo *repositories.EncryptedPasswordsRepository) PasswordsService {
+func NewPasswordService(passwordRepo *repositories.EncryptedPasswordsRepository) EncryptedPasswordsService {
 	return &passwordServiceInstance{
 		PasswordRepo: *passwordRepo,
 	}

@@ -8,7 +8,8 @@ import (
 
 type ServiceManager struct {
 	logger          *logger.Logger
-	PasswordService PasswordsService
+	PasswordService EncryptedPasswordsService
+	UsersService    UsersService
 }
 
 var log *logger.Logger
@@ -19,8 +20,12 @@ func NewServiceManager(db *database.DbService, logger *logger.Logger) *ServiceMa
 	passwordRepo := repositories.NewPasswordRepo(db, logger)
 	passwordService := NewPasswordService(&passwordRepo)
 
+	usersRepo := repositories.NewUsersRepo(db)
+	usersService := NewUsersService(&usersRepo)
+
 	return &ServiceManager{
 		logger:          logger,
 		PasswordService: passwordService,
+		UsersService:    usersService,
 	}
 }
