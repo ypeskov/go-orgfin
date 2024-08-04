@@ -9,6 +9,7 @@ type UsersRepository interface {
 	GetAllUsers() ([]*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
 	CreateUser(user *models.User) error
+	GetUserById(id int) (*models.User, error)
 }
 
 type usersRepoInstance struct {
@@ -46,6 +47,17 @@ func (u *usersRepoInstance) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	err := u.db.Db.Get(&user, "SELECT * FROM users WHERE email = $1", email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *usersRepoInstance) GetUserById(userId int) (*models.User, error) {
+	var user models.User
+
+	err := u.db.Db.Get(&user, "SELECT * FROM users WHERE id = $1", userId)
 	if err != nil {
 		return nil, err
 	}

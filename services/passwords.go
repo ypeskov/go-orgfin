@@ -6,7 +6,7 @@ import (
 )
 
 type EncryptedPasswordsService interface {
-	GetAllPasswords() ([]*models.EncryptedPassword, error)
+	GetAllPasswords(userId int) ([]*models.EncryptedPassword, error)
 	GetPasswordById(id int) (*models.EncryptedPassword, error)
 	AddPassword(password *models.EncryptedPassword) error
 	UpdatePassword(password *models.EncryptedPassword) error
@@ -23,8 +23,8 @@ func NewPasswordService(passwordRepo *repositories.EncryptedPasswordsRepository)
 	}
 }
 
-func (p *passwordServiceInstance) GetAllPasswords() ([]*models.EncryptedPassword, error) {
-	passwords, err := p.PasswordRepo.GetAllPasswords()
+func (p *passwordServiceInstance) GetAllPasswords(userId int) ([]*models.EncryptedPassword, error) {
+	passwords, err := p.PasswordRepo.GetAllPasswords(userId)
 	if err != nil {
 		log.Errorln("Error getting all passwords: %e\n", err)
 		return nil, err

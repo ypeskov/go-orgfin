@@ -14,7 +14,8 @@ import (
 )
 
 type jwtCustomClaims struct {
-	Username string `json:"username"`
+	Id    int    `json:"id"`
+	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
@@ -90,17 +91,29 @@ func (ar *AuthRoutes) LoginForm(c echo.Context) error {
 }
 
 func (ar *AuthRoutes) Login(c echo.Context) error {
-	username := c.FormValue("username")
+	email := c.FormValue("email")
 	password := c.FormValue("password")
-	log.Infof("Login attempt: %s\n", username)
+	log.Infof("Login attempt: %s\n", email)
 
-	if username != "jon" || password != "qqq" {
-		log.Warnf("Unauthorized login attempt: %s\n", username)
+	user, err := sManager.UsersService.GetUserByEmail(email)
+	if err != nil {
+		log.Errorf("Error getting user by email: %s\n", err)
+		return echo.ErrInternalServerError
+	}
+
+	if user == nil {
+		//TODO: Add component when user not found
 		return echo.ErrUnauthorized
 	}
 
+	if !comparePassword(user.HashPassword, password) {
+		log.Errorf("Invalid password for user: %s\n", email)
+		return echo.ErrUnauthorized
+	}
+
+	log.Infof("User logged in: %+v\n", user)
 	claims := &jwtCustomClaims{
-		Username: "Jon Snow",
+		Id: user.Id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 		},
@@ -188,4 +201,9 @@ func (ar *AuthRoutes) Register(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusFound, "/auth/login")
+}
+
+func comparePassword(hashedPassword, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
 }

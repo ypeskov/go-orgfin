@@ -8,7 +8,7 @@ import (
 )
 
 type EncryptedPasswordsRepository interface {
-	GetAllPasswords() ([]*models.EncryptedPassword, error)
+	GetAllPasswords(userId int) ([]*models.EncryptedPassword, error)
 	GetPasswordById(id int) (*models.EncryptedPassword, error)
 	AddPassword(password *models.EncryptedPassword) error
 	UpdatePassword(password *models.EncryptedPassword) error
@@ -29,9 +29,9 @@ func NewPasswordRepo(db *database.DbService, logger *logger.Logger) EncryptedPas
 	}
 }
 
-func (p *passRepoInstance) GetAllPasswords() ([]*models.EncryptedPassword, error) {
+func (p *passRepoInstance) GetAllPasswords(userId int) ([]*models.EncryptedPassword, error) {
 	var passwords []*models.EncryptedPassword
-	err := p.db.Db.Select(&passwords, "SELECT * FROM passwords")
+	err := p.db.Db.Select(&passwords, "SELECT * FROM encrypted_passwords WHERE user_id = $1", userId)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error getting all passwords: %v", err))
 		return nil, err
@@ -43,7 +43,7 @@ func (p *passRepoInstance) GetAllPasswords() ([]*models.EncryptedPassword, error
 func (p *passRepoInstance) GetPasswordById(id int) (*models.EncryptedPassword, error) {
 	var password models.EncryptedPassword
 
-	err := p.db.Db.Get(&password, "SELECT * FROM passwords WHERE id = $1", id)
+	err := p.db.Db.Get(&password, "SELECT * FROM encrypted_passwords WHERE id = $1", id)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error getting password by id: %v", err))
 		return nil, err
@@ -53,9 +53,9 @@ func (p *passRepoInstance) GetPasswordById(id int) (*models.EncryptedPassword, e
 }
 
 func (p *passRepoInstance) AddPassword(password *models.EncryptedPassword) error {
-	log.Debugf("Adding password %v", password)
-	_, err := p.db.Db.NamedExec(`INSERT INTO passwords (name, resource, password, salt, iv) 
-		VALUES (:name, :resource, :password, :salt, :iv)`,
+	log.Infof("Adding password for user id: %v\n", password.UserId)
+	_, err := p.db.Db.NamedExec(`INSERT INTO encrypted_passwords (user_id, name, resource, password, salt, iv) 
+		VALUES (:user_id, :name, :resource, :password, :salt, :iv)`,
 		password)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error adding password: %v", err))

@@ -6,12 +6,13 @@ import (
 )
 
 type User struct {
-	Id           int       `json:"id" form:"id" db:"id"`
-	Name         string    `json:"name" form:"name" db:"name"`
-	Email        string    `json:"email" form:"email" db:"email" validate:"required,email"`
-	HashPassword string    `json:"password" form:"password" db:"hash_password" validate:"required"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	Id           int        `json:"id" form:"id" db:"id"`
+	Name         string     `json:"name" form:"name" db:"name"`
+	Email        string     `json:"email" form:"email" db:"email" validate:"required,email"`
+	HashPassword string     `json:"password" form:"password" db:"hash_password" validate:"required"`
+	LastLogin    *time.Time `json:"last_login" db:"last_login"`
+	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 func (u *User) Validate() error {

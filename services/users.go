@@ -9,6 +9,7 @@ type UsersService interface {
 	GetAllUsers() ([]*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
 	CreateUser(user *models.User) error
+	GetUserById(id int) (*models.User, error)
 }
 
 type usersServiceInstance struct {
@@ -45,6 +46,16 @@ func (u *usersServiceInstance) GetUserByEmail(email string) (*models.User, error
 	user, err := u.UsersRepo.GetUserByEmail(email)
 	if err != nil {
 		log.Errorf("Error getting user by email: %e\n", err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *usersServiceInstance) GetUserById(userId int) (*models.User, error) {
+	user, err := u.UsersRepo.GetUserById(userId)
+	if err != nil {
+		log.Errorf("Error getting user by id: %e\n", err)
 		return nil, err
 	}
 

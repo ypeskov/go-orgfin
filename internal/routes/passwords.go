@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -25,7 +26,14 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 }
 
 func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
-	passwords, err := sManager.PasswordService.GetAllPasswords()
+	userJWT := c.Get("user").(*jwt.Token)
+	claims, ok := userJWT.Claims.(*jwtCustomClaims)
+	if !ok {
+		log.Errorf("Invalid claim type: %+v\n", userJWT.Claims)
+		return c.JSON(http.StatusUnauthorized, "invalid claim type")
+	}
+
+	passwords, err := sManager.PasswordService.GetAllPasswords(claims.Id)
 	if err != nil {
 		log.Errorf("Error getting all passwords: %e\n", err)
 		return err
