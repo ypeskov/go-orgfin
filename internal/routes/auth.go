@@ -78,6 +78,7 @@ func RegisterAuthRoutes(g *echo.Group, cfg *config.Config) {
 	g.POST("/login", ar.Login)
 	g.GET("/register", ar.RegisterForm)
 	g.POST("/register", ar.Register)
+	g.GET("/logout", ar.Logout)
 }
 
 func (ar *AuthRoutes) LoginForm(c echo.Context) error {
@@ -119,6 +120,20 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 		Secure:   false,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
+	})
+
+	return c.Redirect(http.StatusFound, "/")
+}
+
+func (ar *AuthRoutes) Logout(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   -1, // Устанавливаем MaxAge в -1, чтобы удалить куку
 	})
 
 	return c.Redirect(http.StatusFound, "/")

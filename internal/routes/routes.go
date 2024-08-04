@@ -46,6 +46,10 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 		ErrorHandler: customJWTErrorHandler,
 	}
 
+	userRoutesGroup := e.Group("/user")
+	userRoutesGroup.Use(echojwt.WithConfig(jwtConfig))
+	RegisterUserRoutes(userRoutesGroup, cfg)
+
 	passwordsRoutesGroup := e.Group("/passwords")
 	passwordsRoutesGroup.Use(echojwt.WithConfig(jwtConfig))
 	RegisterPasswordsRoutes(passwordsRoutesGroup)
