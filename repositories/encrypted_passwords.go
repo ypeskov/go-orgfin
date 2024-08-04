@@ -7,11 +7,11 @@ import (
 	"ypeskov/go-password-manager/models"
 )
 
-type PasswordsRepository interface {
-	GetAllPasswords() ([]*models.Password, error)
-	GetPasswordById(id int) (*models.Password, error)
-	AddPassword(password *models.Password) error
-	UpdatePassword(password *models.Password) error
+type EncryptedPasswordsRepository interface {
+	GetAllPasswords() ([]*models.EncryptedPassword, error)
+	GetPasswordById(id int) (*models.EncryptedPassword, error)
+	AddPassword(password *models.EncryptedPassword) error
+	UpdatePassword(password *models.EncryptedPassword) error
 	DeletePassword(id string) error
 }
 
@@ -21,7 +21,7 @@ type passRepoInstance struct {
 
 var log *logger.Logger
 
-func NewPasswordRepo(db *database.DbService, logger *logger.Logger) PasswordsRepository {
+func NewPasswordRepo(db *database.DbService, logger *logger.Logger) EncryptedPasswordsRepository {
 	log = logger
 
 	return &passRepoInstance{
@@ -29,8 +29,8 @@ func NewPasswordRepo(db *database.DbService, logger *logger.Logger) PasswordsRep
 	}
 }
 
-func (p *passRepoInstance) GetAllPasswords() ([]*models.Password, error) {
-	var passwords []*models.Password
+func (p *passRepoInstance) GetAllPasswords() ([]*models.EncryptedPassword, error) {
+	var passwords []*models.EncryptedPassword
 	err := p.db.Db.Select(&passwords, "SELECT * FROM passwords")
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error getting all passwords: %v", err))
@@ -40,8 +40,8 @@ func (p *passRepoInstance) GetAllPasswords() ([]*models.Password, error) {
 	return passwords, nil
 }
 
-func (p *passRepoInstance) GetPasswordById(id int) (*models.Password, error) {
-	var password models.Password
+func (p *passRepoInstance) GetPasswordById(id int) (*models.EncryptedPassword, error) {
+	var password models.EncryptedPassword
 
 	err := p.db.Db.Get(&password, "SELECT * FROM passwords WHERE id = $1", id)
 	if err != nil {
@@ -52,7 +52,7 @@ func (p *passRepoInstance) GetPasswordById(id int) (*models.Password, error) {
 	return &password, nil
 }
 
-func (p *passRepoInstance) AddPassword(password *models.Password) error {
+func (p *passRepoInstance) AddPassword(password *models.EncryptedPassword) error {
 	log.Debugf("Adding password %v", password)
 	_, err := p.db.Db.NamedExec(`INSERT INTO passwords (name, resource, password, salt, iv) 
 		VALUES (:name, :resource, :password, :salt, :iv)`,
@@ -65,7 +65,7 @@ func (p *passRepoInstance) AddPassword(password *models.Password) error {
 	return nil
 }
 
-func (p *passRepoInstance) UpdatePassword(password *models.Password) error {
+func (p *passRepoInstance) UpdatePassword(password *models.EncryptedPassword) error {
 	_, err := p.db.Db.NamedExec(`UPDATE passwords SET name = :name, resource = :resource,
                      password = :password, salt = :salt, iv = :iv WHERE id = :id`,
 		password)

@@ -2,7 +2,7 @@ package models
 
 import "github.com/go-playground/validator"
 
-type Password struct {
+type EncryptedPassword struct {
 	Id       int    `json:"id" form:"id"`
 	Name     string `json:"name" form:"name" validate:"required"`
 	Resource string `json:"resource" form:"resource"`
@@ -11,7 +11,7 @@ type Password struct {
 	Iv       string `json:"iv" form:"iv"`
 }
 
-func (p *Password) Validate() error {
+func (p *EncryptedPassword) Validate() error {
 	validate := validator.New()
 
 	return validate.Struct(p)

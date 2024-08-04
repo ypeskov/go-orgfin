@@ -37,7 +37,7 @@ func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
-	log.Infof("Password Record details page requested, id: [%s]\n", c.Param("id"))
+	log.Infof("EncryptedPassword Record details page requested, id: [%s]\n", c.Param("id"))
 	passwordId := c.Param("id")
 	id, err := strconv.Atoi(passwordId)
 	if err != nil {
@@ -58,7 +58,7 @@ func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
 
 func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
 	log.Infof("New password page requested\n")
-	newPassword := models.Password{}
+	newPassword := models.EncryptedPassword{}
 
 	component := components.PasswordForm(newPassword)
 
@@ -66,7 +66,7 @@ func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
-	password := models.Password{}
+	password := models.EncryptedPassword{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
@@ -104,7 +104,7 @@ func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 
 func (pr *PasswordsRoutes) UpdatePassword(c echo.Context) error {
 	log.Infof("Updating password\n")
-	password := models.Password{}
+	password := models.EncryptedPassword{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
@@ -126,7 +126,7 @@ func (pr *PasswordsRoutes) DeletePassword(c echo.Context) error {
 		log.Errorf("Error deleting password: %e\n", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error deleting password"})
 	}
-	log.Infof("Password with id %s was deleted", passwordId)
+	log.Infof("EncryptedPassword with id %s was deleted", passwordId)
 
 	c.Response().Header().Set("HX-Location", "/")
 	return c.NoContent(http.StatusOK)

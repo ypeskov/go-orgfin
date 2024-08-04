@@ -152,7 +152,7 @@ func (ar *AuthRoutes) Register(c echo.Context) error {
 	log.Infof("Registration attempt, username: [%s]\n", username)
 
 	if username == "" || password == "" || confirmPassword == "" {
-		log.Warnf("Invalid registration attempt: missing fields: [username] or [password] or [confirm_password]")
+		log.Errorf("Invalid registration attempt: missing fields: [username] or [password] or [confirm_password]")
 		return echo.ErrBadRequest
 	}
 
