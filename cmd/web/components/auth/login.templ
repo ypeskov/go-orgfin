@@ -2,6 +2,7 @@ package auth
 
 import (
 	"ypeskov/go-password-manager/cmd/web/layouts"
+	"ypeskov/go-password-manager/internal/routes/errors"
 )
 
 templ LoginForm() {
@@ -30,29 +31,38 @@ templ LoginForm() {
 	}
 }
 
-templ RegisterForm() {
+templ RegisterForm(userError *errors.UserError, formData map[string]string) {
 	@layouts.Base() {
 		<a href="/" class="bg-blue-600 text-white rounded-md p-2">Back</a>
 
 		<div class="space-y-4 p-6 bg-white shadow-md rounded-md">
+			if userError != nil {
+				<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">{ userError.Message }</div>
+			}
 			<form action="/auth/register" method="post">
 				<div class="flex flex-col space-y-4 w-3/4 mx-auto">
 					<label for="email" class="text-sm font-semibold text-gray-700">Email</label>
 					<input type="text"
 								id="email"
 								name="email"
+								value={formData["email"]}
 								class="border border-gray-300 rounded-md p-2 bg-slate-300"
 								placeholder="Email" />
+
+
 					<label for="password" class="text-sm font-semibold text-gray-700">Password</label>
 					<input type="password"
 								id="password"
 								name="password"
+								value={formData["password"]}
 								class="border border-gray-300 rounded-md p-2 bg-slate-300"
 								placeholder="Password" />
+
 					<label for="confirm_password" class="text-sm font-semibold text-gray-700">Confirm Password</label>
 					<input type="password"
 								id="confirm_password"
 								name="confirm_password"
+								value={formData["confirm_password"]}
 								class="border border-gray-300 rounded-md p-2 bg-slate-300"
 								placeholder="Confirm Password" />
 					<button type="submit" class="bg-blue-500 text-white rounded-md p-2">Register</button>

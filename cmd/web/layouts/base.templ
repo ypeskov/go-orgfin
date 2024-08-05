@@ -9,8 +9,12 @@ templ Base() {
 			<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon"/>
 			<link href="/assets/css/output.css" rel="stylesheet"/>
 			<script src="/assets/js/htmx.min.js"></script>
+			<script>
+				let masterPassword = '';
+			</script>
 		</head>
 		<body hx-boost="true" class="h-screen flex flex-col">
+
 			<div class="flex justify-between p-6 bg-gray-800">
 				<div>
 					<a href="/" class="text-white text-2xl font-bold hover:text-gray-400">

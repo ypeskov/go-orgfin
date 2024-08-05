@@ -2,6 +2,7 @@ package routes
 
 import (
 	"errors"
+	"github.com/a-h/templ"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -10,6 +11,7 @@ import (
 	"time"
 	"ypeskov/go-password-manager/cmd/web/components/auth"
 	"ypeskov/go-password-manager/internal/config"
+	routeErrors "ypeskov/go-password-manager/internal/routes/errors"
 	"ypeskov/go-password-manager/models"
 )
 
@@ -155,27 +157,70 @@ func (ar *AuthRoutes) Logout(c echo.Context) error {
 }
 
 func (ar *AuthRoutes) RegisterForm(c echo.Context) error {
-	component := auth.RegisterForm()
+	formData, _ := c.Get("formData").(map[string]string)
+	if formData == nil {
+		formData = map[string]string{
+			"email":            "",
+			"password":         "",
+			"confirm_password": "",
+		}
+	}
+
+	errorResponse, ok := c.Get("error").(*routeErrors.UserError)
+	var component templ.Component
+	if ok && errorResponse != nil {
+		component = auth.RegisterForm(errorResponse, formData)
+	} else {
+		component = auth.RegisterForm(nil, formData)
+	}
 
 	return Render(c, http.StatusOK, component)
 }
 
 func (ar *AuthRoutes) Register(c echo.Context) error {
-	username := c.FormValue("email")
+	email := c.FormValue("email")
 	password := c.FormValue("password")
 	confirmPassword := c.FormValue("confirm_password")
-	log.Infof("Registration attempt, username: [%s]\n", username)
+	log.Infof("Registration attempt, username: [%s]\n", email)
 
-	if username == "" || password == "" || confirmPassword == "" {
-		log.Errorf("Invalid registration attempt: missing fields: [email] or [password] or [confirm_password]")
-		return echo.ErrBadRequest
+	formData := map[string]string{
+		"email":            email,
+		"password":         password,
+		"confirm_password": confirmPassword,
+	}
+	c.Set("formData", formData)
+
+	if email == "" {
+		log.Printf("Invalid registration attempt: missing email")
+		c.Set("error", routeErrors.MissingEmail)
+		return ar.RegisterForm(c)
+	}
+	if password == "" {
+		log.Printf("Invalid registration attempt: missing password")
+		c.Set("error", routeErrors.MissingPassword)
+		return ar.RegisterForm(c)
+	}
+	if confirmPassword == "" {
+		log.Printf("Invalid registration attempt: missing confirm password")
+		c.Set("error", routeErrors.MissingConfirmPassword)
+		return ar.RegisterForm(c)
 	}
 
 	if password != confirmPassword {
 		log.Printf("Invalid registration attempt: passwords do not match")
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"error": "Passwords do not match",
-		})
+		c.Set("error", routeErrors.UserPasswordsDoNotMatch)
+		return ar.RegisterForm(c)
+	}
+
+	userExists, err := sManager.UsersService.GetUserByEmail(email)
+	if err != nil {
+		log.Errorf("Error getting user by email: %s\n", err)
+		return echo.ErrInternalServerError
+	}
+	if userExists != nil {
+		log.Errorf("User already exists: %s\n", email)
+		c.Set("error", routeErrors.UserExists)
+		return ar.RegisterForm(c)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -184,7 +229,7 @@ func (ar *AuthRoutes) Register(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 	user := &models.User{
-		Email:        username,
+		Email:        email,
 		HashPassword: string(hashedPassword),
 	}
 
