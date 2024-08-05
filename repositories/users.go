@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"database/sql"
+	"errors"
 	"ypeskov/go-password-manager/internal/database"
 	"ypeskov/go-password-manager/models"
 )
@@ -48,6 +50,9 @@ func (u *usersRepoInstance) GetUserByEmail(email string) (*models.User, error) {
 
 	err := u.db.Db.Get(&user, "SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
