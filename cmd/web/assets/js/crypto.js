@@ -1,3 +1,5 @@
+
+
 async function getKey(key, salt) {
     const enc = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
@@ -79,7 +81,17 @@ async function showPassword() {
     const encryptedPassword = base64ToArrayBuffer(document.getElementById('password').textContent);
 
     document.getElementById('decrypted-password').textContent
-        = await decrypt(encryptedPassword, 'zalupa', salt, iv);
+        = await decrypt(encryptedPassword, getMasterPassword(), salt, iv);
     document.getElementById('decrypted-password').classList.remove('hidden');
     document.getElementById('show-password-button').classList.add('hidden');
+}
+
+
+
+function getMasterPassword() {
+    if (masterPassword === '') {
+        masterPassword = prompt('Enter master password:');
+    }
+
+    return masterPassword;
 }
