@@ -46,6 +46,10 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 		ErrorHandler: customJWTErrorHandler,
 	}
 
+	userRoutesGroup := e.Group("/user")
+	userRoutesGroup.Use(echojwt.WithConfig(jwtConfig))
+	RegisterUserRoutes(userRoutesGroup, cfg)
+
 	passwordsRoutesGroup := e.Group("/passwords")
 	passwordsRoutesGroup.Use(echojwt.WithConfig(jwtConfig))
 	RegisterPasswordsRoutes(passwordsRoutesGroup)
@@ -56,7 +60,7 @@ func RegisterRoutes(logger *logger.Logger, servicesManager *services.ServiceMana
 func HomeWebHandler(c echo.Context) error {
 	claims, err := getUserFromToken(c, cfg)
 	if err == nil && claims != nil {
-		log.Infof("Home page requested by user: %s\n", claims.Username)
+		log.Infof("Home page requested by user: %s\n", claims.Email)
 		return c.Redirect(http.StatusFound, "/passwords")
 	}
 

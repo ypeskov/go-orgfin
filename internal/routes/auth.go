@@ -4,15 +4,18 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strings"
 	"time"
 	"ypeskov/go-password-manager/cmd/web/components/auth"
 	"ypeskov/go-password-manager/internal/config"
+	"ypeskov/go-password-manager/models"
 )
 
 type jwtCustomClaims struct {
-	Username string `json:"username"`
+	Id    int    `json:"id"`
+	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
@@ -78,6 +81,7 @@ func RegisterAuthRoutes(g *echo.Group, cfg *config.Config) {
 	g.POST("/login", ar.Login)
 	g.GET("/register", ar.RegisterForm)
 	g.POST("/register", ar.Register)
+	g.GET("/logout", ar.Logout)
 }
 
 func (ar *AuthRoutes) LoginForm(c echo.Context) error {
@@ -87,17 +91,29 @@ func (ar *AuthRoutes) LoginForm(c echo.Context) error {
 }
 
 func (ar *AuthRoutes) Login(c echo.Context) error {
-	username := c.FormValue("username")
+	email := c.FormValue("email")
 	password := c.FormValue("password")
-	log.Infof("Login attempt: %s\n", username)
+	log.Infof("Login attempt: %s\n", email)
 
-	if username != "jon" || password != "qqq" {
-		log.Warnf("Unauthorized login attempt: %s\n", username)
+	user, err := sManager.UsersService.GetUserByEmail(email)
+	if err != nil {
+		log.Errorf("Error getting user by email: %s\n", err)
+		return echo.ErrInternalServerError
+	}
+
+	if user == nil {
+		//TODO: Add component when user not found
 		return echo.ErrUnauthorized
 	}
 
+	if !comparePassword(user.HashPassword, password) {
+		log.Errorf("Invalid password for user: %s\n", email)
+		return echo.ErrUnauthorized
+	}
+
+	log.Infof("User logged in: %+v\n", user)
 	claims := &jwtCustomClaims{
-		Username: "Jon Snow",
+		Id: user.Id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 		},
@@ -124,6 +140,20 @@ func (ar *AuthRoutes) Login(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
+func (ar *AuthRoutes) Logout(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   -1, // Устанавливаем MaxAge в -1, чтобы удалить куку
+	})
+
+	return c.Redirect(http.StatusFound, "/")
+}
+
 func (ar *AuthRoutes) RegisterForm(c echo.Context) error {
 	component := auth.RegisterForm()
 
@@ -131,13 +161,13 @@ func (ar *AuthRoutes) RegisterForm(c echo.Context) error {
 }
 
 func (ar *AuthRoutes) Register(c echo.Context) error {
-	username := c.FormValue("username")
+	username := c.FormValue("email")
 	password := c.FormValue("password")
 	confirmPassword := c.FormValue("confirm_password")
 	log.Infof("Registration attempt, username: [%s]\n", username)
 
 	if username == "" || password == "" || confirmPassword == "" {
-		log.Warnf("Invalid registration attempt: missing fields: [username] or [password] or [confirm_password]")
+		log.Errorf("Invalid registration attempt: missing fields: [email] or [password] or [confirm_password]")
 		return echo.ErrBadRequest
 	}
 
@@ -148,11 +178,32 @@ func (ar *AuthRoutes) Register(c echo.Context) error {
 		})
 	}
 
-	// Add logic to save the new user to the database
-	// Example: user, err := saveUserToDatabase(username, password)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Errorf("Error hashing password: %s\n", err)
+		return echo.ErrInternalServerError
+	}
+	user := &models.User{
+		Email:        username,
+		HashPassword: string(hashedPassword),
+	}
 
-	// For demonstration purposes, we just return a success message
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "User registered successfully",
-	})
+	err = user.Validate()
+	if err != nil {
+		log.Errorf("Error validating user: %s\n", err)
+		return echo.ErrBadRequest
+	}
+
+	err = sManager.UsersService.CreateUser(user)
+	if err != nil {
+		log.Errorf("Error saving user to the database: %s\n", err)
+		return echo.ErrInternalServerError
+	}
+
+	return c.Redirect(http.StatusFound, "/auth/login")
+}
+
+func comparePassword(hashedPassword, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
 }

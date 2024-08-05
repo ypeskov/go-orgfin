@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -25,7 +26,14 @@ func RegisterPasswordsRoutes(g *echo.Group) {
 }
 
 func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
-	passwords, err := sManager.PasswordService.GetAllPasswords()
+	userJWT := c.Get("user").(*jwt.Token)
+	claims, ok := userJWT.Claims.(*jwtCustomClaims)
+	if !ok {
+		log.Errorf("Invalid claim type: %+v\n", userJWT.Claims)
+		return c.JSON(http.StatusUnauthorized, "invalid claim type")
+	}
+
+	passwords, err := sManager.PasswordService.GetAllPasswords(claims.Id)
 	if err != nil {
 		log.Errorf("Error getting all passwords: %e\n", err)
 		return err
@@ -37,7 +45,7 @@ func (pr *PasswordsRoutes) PasswordsListWeb(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
-	log.Infof("Password Record details page requested, id: [%s]\n", c.Param("id"))
+	log.Infof("EncryptedPassword Record details page requested, id: [%s]\n", c.Param("id"))
 	passwordId := c.Param("id")
 	id, err := strconv.Atoi(passwordId)
 	if err != nil {
@@ -58,7 +66,7 @@ func (pr *PasswordsRoutes) PasswordDetailsWebHandler(c echo.Context) error {
 
 func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
 	log.Infof("New password page requested\n")
-	newPassword := models.Password{}
+	newPassword := models.EncryptedPassword{}
 
 	component := components.PasswordForm(newPassword)
 
@@ -66,11 +74,19 @@ func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
-	password := models.Password{}
+	userJWT := c.Get("user").(*jwt.Token)
+	claims, ok := userJWT.Claims.(*jwtCustomClaims)
+	if !ok {
+		log.Errorf("Invalid claim type: %+v\n", userJWT.Claims)
+		return c.JSON(http.StatusUnauthorized, "invalid claim type")
+	}
+
+	password := models.EncryptedPassword{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
+	password.UserId = claims.Id
 	log.Infof("Adding new password: %+v\n", password)
 
 	err := sManager.PasswordService.AddPassword(&password)
@@ -104,7 +120,7 @@ func (pr *PasswordsRoutes) EditPasswordWebHandler(c echo.Context) error {
 
 func (pr *PasswordsRoutes) UpdatePassword(c echo.Context) error {
 	log.Infof("Updating password\n")
-	password := models.Password{}
+	password := models.EncryptedPassword{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
@@ -126,7 +142,7 @@ func (pr *PasswordsRoutes) DeletePassword(c echo.Context) error {
 		log.Errorf("Error deleting password: %e\n", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error deleting password"})
 	}
-	log.Infof("Password with id %s was deleted", passwordId)
+	log.Infof("EncryptedPassword with id %s was deleted", passwordId)
 
 	c.Response().Header().Set("HX-Location", "/")
 	return c.NoContent(http.StatusOK)

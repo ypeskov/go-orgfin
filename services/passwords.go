@@ -5,26 +5,26 @@ import (
 	"ypeskov/go-password-manager/repositories"
 )
 
-type PasswordsService interface {
-	GetAllPasswords() ([]*models.Password, error)
-	GetPasswordById(id int) (*models.Password, error)
-	AddPassword(password *models.Password) error
-	UpdatePassword(password *models.Password) error
+type EncryptedPasswordsService interface {
+	GetAllPasswords(userId int) ([]*models.EncryptedPassword, error)
+	GetPasswordById(id int) (*models.EncryptedPassword, error)
+	AddPassword(password *models.EncryptedPassword) error
+	UpdatePassword(password *models.EncryptedPassword) error
 	DeletePassword(id string) error
 }
 
 type passwordServiceInstance struct {
-	PasswordRepo repositories.PasswordsRepository
+	PasswordRepo repositories.EncryptedPasswordsRepository
 }
 
-func NewPasswordService(passwordRepo *repositories.PasswordsRepository) PasswordsService {
+func NewPasswordService(passwordRepo *repositories.EncryptedPasswordsRepository) EncryptedPasswordsService {
 	return &passwordServiceInstance{
 		PasswordRepo: *passwordRepo,
 	}
 }
 
-func (p *passwordServiceInstance) GetAllPasswords() ([]*models.Password, error) {
-	passwords, err := p.PasswordRepo.GetAllPasswords()
+func (p *passwordServiceInstance) GetAllPasswords(userId int) ([]*models.EncryptedPassword, error) {
+	passwords, err := p.PasswordRepo.GetAllPasswords(userId)
 	if err != nil {
 		log.Errorln("Error getting all passwords: %e\n", err)
 		return nil, err
@@ -33,7 +33,7 @@ func (p *passwordServiceInstance) GetAllPasswords() ([]*models.Password, error) 
 	return passwords, nil
 }
 
-func (p *passwordServiceInstance) GetPasswordById(id int) (*models.Password, error) {
+func (p *passwordServiceInstance) GetPasswordById(id int) (*models.EncryptedPassword, error) {
 	password, err := p.PasswordRepo.GetPasswordById(id)
 	if err != nil {
 		log.Errorf("Error getting password by id: %e\n", err)
@@ -43,7 +43,7 @@ func (p *passwordServiceInstance) GetPasswordById(id int) (*models.Password, err
 	return password, nil
 }
 
-func (p *passwordServiceInstance) AddPassword(password *models.Password) error {
+func (p *passwordServiceInstance) AddPassword(password *models.EncryptedPassword) error {
 	err := p.PasswordRepo.AddPassword(password)
 	if err != nil {
 		log.Errorf("Error adding password: %e\n", err)
@@ -53,7 +53,7 @@ func (p *passwordServiceInstance) AddPassword(password *models.Password) error {
 	return nil
 }
 
-func (p *passwordServiceInstance) UpdatePassword(password *models.Password) error {
+func (p *passwordServiceInstance) UpdatePassword(password *models.EncryptedPassword) error {
 	err := p.PasswordRepo.UpdatePassword(password)
 	if err != nil {
 		log.Errorf("Error updating password: %e\n", err)
