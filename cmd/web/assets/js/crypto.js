@@ -15,7 +15,7 @@ async function getKey(key, salt) {
             hash: 'SHA-256'
         },
         keyMaterial,
-        { name: 'AES-GCM', length: 256 },
+        {name: 'AES-GCM', length: 256},
         false,
         ['encrypt', 'decrypt']
     );
@@ -48,7 +48,7 @@ async function encrypt(text, key) {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const cryptoKey = await getKey(key, salt);
     const ciphertext = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv: iv },
+        {name: 'AES-GCM', iv: iv},
         cryptoKey,
         encoded
     );
@@ -65,10 +65,21 @@ async function encrypt(text, key) {
 async function decrypt(encryptedData, key, salt, iv) {
     const cryptoKey = await getKey(key, new Uint8Array(salt));
     const decrypted = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: new Uint8Array(iv) },
+        {name: 'AES-GCM', iv: new Uint8Array(iv)},
         cryptoKey,
         new Uint8Array(encryptedData)
     );
     const dec = new TextDecoder();
     return dec.decode(decrypted);
+}
+
+async function showPassword() {
+    const salt = base64ToArrayBuffer(document.getElementById('password-salt').textContent);
+    const iv = base64ToArrayBuffer(document.getElementById('password-iv').textContent);
+    const encryptedPassword = base64ToArrayBuffer(document.getElementById('password').textContent);
+
+    document.getElementById('decrypted-password').textContent
+        = await decrypt(encryptedPassword, 'zalupa', salt, iv);
+    document.getElementById('decrypted-password').classList.remove('hidden');
+    document.getElementById('show-password-button').classList.add('hidden');
 }

@@ -74,11 +74,19 @@ func (pr *PasswordsRoutes) NewPasswordWebHandler(c echo.Context) error {
 }
 
 func (pr *PasswordsRoutes) AddPassword(c echo.Context) error {
+	userJWT := c.Get("user").(*jwt.Token)
+	claims, ok := userJWT.Claims.(*jwtCustomClaims)
+	if !ok {
+		log.Errorf("Invalid claim type: %+v\n", userJWT.Claims)
+		return c.JSON(http.StatusUnauthorized, "invalid claim type")
+	}
+
 	password := models.EncryptedPassword{}
 	if err := c.Bind(&password); err != nil {
 		log.Errorf("Error binding password: %e\n", err)
 		return err
 	}
+	password.UserId = claims.Id
 	log.Infof("Adding new password: %+v\n", password)
 
 	err := sManager.PasswordService.AddPassword(&password)

@@ -54,8 +54,8 @@ func (p *passRepoInstance) GetPasswordById(id int) (*models.EncryptedPassword, e
 
 func (p *passRepoInstance) AddPassword(password *models.EncryptedPassword) error {
 	log.Infof("Adding password for user id: %v\n", password.UserId)
-	_, err := p.db.Db.NamedExec(`INSERT INTO encrypted_passwords (user_id, name, resource, password, salt, iv) 
-		VALUES (:user_id, :name, :resource, :password, :salt, :iv)`,
+	_, err := p.db.Db.NamedExec(`INSERT INTO encrypted_passwords (user_id, name, login, resource, password, salt, iv) 
+		VALUES (:user_id, :name, :login, :resource, :password, :salt, :iv)`,
 		password)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error adding password: %v", err))
@@ -66,7 +66,7 @@ func (p *passRepoInstance) AddPassword(password *models.EncryptedPassword) error
 }
 
 func (p *passRepoInstance) UpdatePassword(password *models.EncryptedPassword) error {
-	_, err := p.db.Db.NamedExec(`UPDATE passwords SET name = :name, resource = :resource,
+	_, err := p.db.Db.NamedExec(`UPDATE encrypted_passwords SET name = :name, login = :login, resource = :resource,
                      password = :password, salt = :salt, iv = :iv WHERE id = :id`,
 		password)
 	if err != nil {
@@ -78,7 +78,7 @@ func (p *passRepoInstance) UpdatePassword(password *models.EncryptedPassword) er
 }
 
 func (p *passRepoInstance) DeletePassword(id string) error {
-	_, err := p.db.Db.Exec("DELETE FROM passwords WHERE id = $1", id)
+	_, err := p.db.Db.Exec("DELETE FROM encrypted_passwords WHERE id = $1", id)
 	if err != nil {
 		log.Errorln(fmt.Sprintf("Error deleting password: %v", err))
 		return err
