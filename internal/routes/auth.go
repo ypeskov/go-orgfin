@@ -150,7 +150,7 @@ func (ar *AuthRoutes) Logout(c echo.Context) error {
 		Secure:   false,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
-		MaxAge:   -1, // Устанавливаем MaxAge в -1, чтобы удалить куку
+		MaxAge:   -1, // Delete cookie
 	})
 
 	return c.Redirect(http.StatusFound, "/")
