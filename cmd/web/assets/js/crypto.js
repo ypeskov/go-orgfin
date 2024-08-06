@@ -89,8 +89,11 @@ async function showPassword() {
 
 
 function getMasterPassword() {
-    if (masterPassword === '') {
+    let masterPassword = sessionStorage.getItem('masterPassword');
+
+    if (masterPassword === null) {
         masterPassword = prompt('Enter master password:');
+        sessionStorage.setItem('masterPassword', masterPassword);
     }
 
     return masterPassword;
