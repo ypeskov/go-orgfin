@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	launchBrowser := flag.Bool("browser", false, "Launch browser on start")
+	flag.Parse()
+
 	cfg, err := config.New()
 	if err != nil {
 		fmt.Printf(fmt.Sprintf("cannot read config: %s", err))
@@ -26,7 +30,9 @@ func main() {
 
 	appServer := server.New(cfg, appLogger)
 
-	//openBrowser(fmt.Sprintf("http://localhost:%s", cfg.Port))
+	if *launchBrowser {
+		openBrowser(fmt.Sprintf("http://localhost:%s", cfg.Port))
+	}
 
 	err = appServer.ListenAndServe()
 	if err != nil {
